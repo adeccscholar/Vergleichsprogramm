@@ -1,0 +1,266 @@
+Fernsehturm                                                             Sehenswürdigkeit     52.520815 13.409419
+Funkturm                                                                Sehenswürdigkeit     52.505033 13.278189
+Brandenburger Tor                                                       Sehenswürdigkeit     52.516275 13.377704
+Reichstag                                                               Sehenswürdigkeit     52.518620 13.376187
+Siegessäule                                                             Sehenswürdigkeit     52.514543 13.350119
+Sony Center                                                             Sehenswürdigkeit     52.510012 13.373408
+Gendarmenmarkt                                                          Sehenswürdigkeit     52.513828 13.392350
+Kronprinzenpalais                                                       Sehenswürdigkeit     52.517032 13.396862
+Alte Kommandantur                                                       Sehenswürdigkeit     52.517228 13.397830
+Bebelplatz                                                              Sehenswürdigkeit     52.516616 13.394147
+Haus der Wannsee-Konferenz                                              Sehenswürdigkeit     52.432919 13.165461
+Reiterstandbild Friedrichs des Großen                                   Denkmal              52.517269 13.392753
+Heinrich-Heine-Denkmal                                                  Denkmal              52.518275 13.394818
+Schinkel-Denkmal                                                        Denkmal              52.516565 13.398635
+Marx-Engels-Forum                                                       Denkmal              52.518821 13.403460
+Saint Georg Denkmal                                                     Denkmal              52.517489 13.404271
+Zoologischer Garten Berlin                                              Tierpark/-gehege     52.507920 13.337755
+Aquarium Berlin                                                         Tierpark/-gehege     52.505987 13.340836
+Tierpark Berlin                                                         Tierpark/-gehege     52.502642 13.531345
+Wildgehege im Spandauer Forst                                           Tierpark/-gehege     52.569385 13.187636
+Kinderbauernhof Pinke-Panke                                             Tierpark/-gehege     52.569080 13.388788
+Berliner Dom                                                            Kirche               52.519061 13.401078
+St. Hedwigs Kathedrale                                                  Kirche               52.515770 13.394810
+Deutscher Dom                                                           Kirche               52.512717 13.392544
+Französischer Dom                                                       Kirche               52.514393 13.392414
+Nikolaikirche Berlin                                                    Kirche               52.516835 13.407483
+St. Marienkirche Berlin                                                 Kirche               52.520611 13.407122
+Friedrichswerdersche Kirche                                             Kirche               52.515888 13.397461
+Parochialkirche                                                         Kirche               52.516429 13.406097
+Alexanderplatz                                                          Sehenswürdigkeit     52.521918 13.413215
+Potsdamer Platz                                                         Sehenswürdigkeit     52.509352 13.375739
+Pariser Platz                                                           Sehenswürdigkeit     52.516889 13.381592
+Glienicker Brücke                                                       Sehenswürdigkeit     52.413491 13.090233
+Oberbaumbrücke                                                          Sehenswürdigkeit     52.503407 13.444541
+Kanzleramt                                                              Sehenswürdigkeit     52.520089 13.369238
+Gedächtniskirche                                                        Sehenswürdigkeit     52.504818 13.335082
+Checkpoint Charlie                                                      Sehenswürdigkeit     52.507443 13.390391
+Bärenbrunnen                                                            Sehenswürdigkeit     52.515613 13.398134
+Zentraler Omnibusbahnhof Berlin                                         Bahnhof/Depot        52.507483 13.279891
+Weltzeituhr                                                             Sehenswürdigkeit     52.521792 13.413931
+AquaDom & SEA LIFE Berlin                                               Tierpark/-gehege     52.520154 13.403690
+Messe Berlin                                                            Location             52.505333 13.280763
+Umlaufkanal                                                             Sehenswürdigkeit     52.512528 13.333509
+Mäusebunker                                                             Location             52.436815 13.317149
+Schwangere Auster                                                       Sehenswürdigkeit     52.518863 13.364918
+Bierpinsel                                                              Sehenswürdigkeit     52.461491 13.325069
+Neptunbrunnen                                                           Sehenswürdigkeit     52.519606 13.406843
+Bauhaus Archiv                                                          Location             52.506363 13.353796
+Haus des Rundfunks                                                      Location             52.507983 13.276842
+Märchenbrunnen Berlin                                                   Sehenswürdigkeit     52.527923 13.426981
+Müggelturm                                                              Sehenswürdigkeit     52.416974 13.625176
+Smart Room - Live Escape Game                                           Sehenswürdigkeit     52.502967 13.470808
+Flensburger Löwe                                                        Denkmal              52.433893 13.165018
+Grunewaldturm                                                           Sehenswürdigkeit     52.478233 13.196796
+Planetarium am Insulaner                                                Planetarium          52.457586 13.349403
+Wilhelm Förster Sternwarte                                              Planetarium          52.457400 13.351204
+Olympiastadion Berlin                                                   Sportstätte          52.514697 13.239499
+Glockenturm Berlin                                                      Sehenswürdigkeit     52.513990 13.234187
+Gotisches Haus                                                          Sehenswürdigkeit     52.537745 13.206504
+Cowboy Club Old Texas Berlin                                            Vergnügungspark      52.540634 13.249028
+Haus des Lehrers                                                        Location             52.521253 13.416415
+Zeiss Großplanetarium                                                   Planetarium          52.542994 13.428028
+Spreepark Berlin                                                        Vergnügungspark      52.483580 13.491672
+KAOS Berlin                                                             Location             52.462447 13.509289
+Trabrennbahn Karlshorst                                                 Pferderennbahn       52.475699 13.524868
+Trabrennbahn Mariendorf                                                 Pferderennbahn       52.414636 13.370146
+Galopprennbahn Hoppegarten                                              Pferderennbahn       52.512719 13.671213  
+Venusbassin                                                             Erhebung (Berg)      52.514479 13.370606
+Teufelssee                                                              Erhebung (Berg)      52.491089 13.233630
+Havelberg                                                               Erhebung (Berg)      52.463944 13.201377
+Karlsberg                                                               Erhebung (Berg)      52.477200 13.195768
+Dachsberg                                                               Erhebung (Berg)      52.490055 13.199271
+Teufelsberg                                                             Erhebung (Berg)      52.497222 13.241111
+Drachenberg                                                             Erhebung (Berg)      52.502289 13.248240
+Berg Hohen-Gatow                                                        Erhebung (Berg)      52.473338 13.167396
+Murellenberg                                                            Erhebung (Berg)      52.517137 13.228451
+Rixdorfer Höhe                                                          Erhebung (Berg)      52.484270 13.412354
+Insulaner                                                               Erhebung (Berg)      52.457390 13.351559
+Fichtenberg                                                             Erhebung (Berg)      52.458216 13.310065
+Lübarser Höhe                                                           Erhebung (Berg)      52.610169 13.370520
+Mühlberg                                                                Erhebung (Berg)      52.625053 13.388193
+Mörderberg                                                              Erhebung (Berg)      52.582118 13.465381
+Rodelberg                                                               Erhebung (Berg)      52.467634 13.495159
+Kanonenberge                                                            Erhebung (Berg)      52.421239 13.613659
+Kleiner Müggelberg                                                      Erhebung (Berg)      52.417313 13.623559
+Großer Müggelberg                                                       Erhebung (Berg)      52.416768 13.642657
+Seddinberg                                                              Erhebung (Berg)      52.401180 13.671514
+Falkenberg                                                              Erhebung (Berg)      52.407058 13.569835
+Britzer Höhe                                                            Erhebung (Berg)      52.432519 13.421114
+Aussichtsberg                                                           Erhebung (Berg)      52.436256 13.416884
+Großer Bunkerberg                                                       Erhebung (Berg)      52.526341 13.432149
+Kleiner Bunkerberg                                                      Erhebung (Berg)      52.527953 13.436376
+Pappelplateau                                                           Erhebung (Berg)      52.536619 13.462578
+Hohes Plateau                                                           Erhebung (Berg)      52.533842 13.463367
+Stadtschloss Berlin                                                     Schloss              52.517240 13.401646
+Schloss Charlottenburg                                                  Schloss              52.520932 13.295617
+Große Orangerie Schloss Charlottenburg                                  Schloss              52.520699 13.293607
+Schloss Britz                                                           Schloss              52.446847 13.437774
+Spandauer Zitadelle                                                     Schloss              52.540798 13.212644
+Jagdschloss Grunewald                                                   Schloss              52.467353 13.261420
+Schloss Köpenick                                                        Schloss              52.443622 13.573333
+Fort Hahneberg                                                          Schloss              52.521667 13.137500
+Schloss Schönhausen                                                     Schloss              52.578345 13.405702
+Jagdschloss Glienicke                                                   Schloss              52.410396 13.098129
+Schloss Pfaueninsel                                                     Schloss              52.439232 13.131916
+Denkmal für die ermordeten Juden Europas                                Gedenkstätte/Denkmal 52.513947 13.378713
+Mahnmal Gleis 17                                                        Gedenkstätte/Denkmal 52.489010 13.264895
+Gedenkstätte Plötzensee                                                 Gedenkstätte/Denkmal 52.540700 13.322370
+Britischer Soldatenfriedhof                                             Gedenkstätte/Denkmal 52.507009 13.221361
+Sowjetisches Ehrenmal im Tiergarten                                     Gedenkstätte/Denkmal 52.516626 13.371929
+Sowjetisches Ehrenmal Treptow                                           Gedenkstätte/Denkmal 52.486139 13.471958
+Sowjetisches Ehrenmal (Schönholzer Heide)                               Gedenkstätte/Denkmal 52.581128 13.373382
+Gedenkstätte Deutscher Widerstand                                       Gedenkstätte/Denkmal 52.507697 13.362686
+Topographie des Terrors                                                 Gedenkstätte/Denkmal 52.506684 13.383702
+Denkzeichen zur Erinnerung an die Ermordeten der NS-Militärjustiz       Gedenkstätte/Denkmal 52.517091 13.222303
+Gedenkstätte Berlin-Hohenschönhausen                                    Gedenkstätte/Denkmal 52.541837 13.500233
+Gedenkstätte Berliner Mauer                                             Gedenkstätte/Denkmal 52.535052 13.390190
+DDR-Wachturm                                                            Gedenkstätte/Denkmal 52.508535 13.379679
+Denkmal für die Opfer der Mauer                                         Gedenkstätte/Denkmal 52.515664 13.368102
+Berliner Mauer Bornholmer Straße                                        Gedenkstätte/Denkmal 52.554770 13.399670
+Platz des 9.November 1989                                               Gedenkstätte/Denkmal 52.554744 13.400547
+Denkmal für die erste Homosexuelle Emanzipationsbewegung                Gedenkstätte/Denkmal 52.518463 13.358510
+Sinti und Roma Denkmal                                                  Gedenkstätte/Denkmal 52.517299 13.376053
+Charité Campus Charité-Klinikum                                         Krankenhaus          52.526462 13.376625
+Charité Campus Virchow-Klinikum                                         Krankenhaus          52.541950 13.343062
+Charité Campus Benjamin Franklin                                        Krankenhaus          52.441788 13.320394
+Unfallkrankenhaus Berlin                                                Krankenhaus          52.519198 13.567525
+DRK Kliniken Berlin Mitte                                               Krankenhaus          52.557389 13.375970
+Vivantes Klinikum Neukölln                                              Krankenhaus          52.437599 13.457677
+Vivantes Auguste-Viktoria-Klinikum                                      Krankenhaus          52.462230 13.346913
+Vivantes Klinikum Spandau                                               Krankenhaus          52.549666 13.206870
+Vivantes Humboldt-Klinikum                                              Krankenhaus          52.589846 13.307557
+Vivantes Wenckebach-Klinikum                                            Krankenhaus          52.458919 13.387996
+Vivantes Klinikum Kaulsdorf                                             Krankenhaus          52.507418 13.592186
+Gemeinschaftskrankenhaus Havelhöhe                                      Krankenhaus          52.462432 13.158849
+Evangelisches Waldkrankenhaus Spandau                                   Krankenhaus          52.562679 13.155969
+Krankenhaus Waldfriede                                                  Krankenhaus          52.444236 13.239900
+DRK Kliniken Berlin Köpenick                                            Krankenhaus          52.440050 13.595444
+Evangelische Elisabeth Klinik                                           Krankenhaus          52.503413 13.364892
+KEH Evangelisches Krankenhaus Königin Elisabeth Herzberge               Krankenhaus          52.527695 13.508852
+Evangelisches Krankenhaus Hubertus                                      Krankenhaus          52.431379 13.219142
+Sankt Gertrauden-Krankenhaus                                            Krankenhaus          52.480608 13.317259
+St. Marien-Krankenhaus                                                  Krankenhaus          52.424304 13.348409
+DRK Kliniken Berlin Westend                                             Krankenhaus          52.520077 13.277364
+Schloßpark Klinik                                                       Krankenhaus          52.521839 13.289612
+Wichernkrankenhaus                                                      Krankenhaus          52.569360 13.192091
+Helios Klinikum Berlin-Buch                                             Krankenhaus          52.631709 13.508478
+Helios Klinikum Emil von Behring                                        Krankenhaus          52.422718 13.254101
+Kliniken im Theodor-Wenzel-Werk                                         Krankenhaus          52.422771 13.205455
+Malteser-Krankenhaus Berlin- Charlottenburg                             Krankenhaus          52.508823 13.251412
+Klinik für Kinder- und Jugendmedizin                                    Krankenhaus          52.525657 13.438472
+Klinkum im Friedrichshain                                               Krankenhaus          52.525483 13.439065
+Hauptbahnhof Berlin                                                     Bahnhof/Depot        52.525084 13.369402
+Berlin Alexanderplatz Bahnhof                                           Bahnhof/Depot        52.521331 13.410630
+Bahnhof Berlin Friedrichstraße                                          Bahnhof/Depot        52.520542 13.386977
+Bahnhof Zoologischer Garten                                             Bahnhof/Depot        52.504733 13.337618
+Berlin Gesundbrunnen (Nordkreuz)                                        Bahnhof/Depot        52.548756 13.386749
+Ostkreuz                                                                Bahnhof/Depot        52.503114 13.472608
+Bahnhof Südkreuz                                                        Bahnhof/Depot        52.475708 13.363223
+Bahnhof Berlin-Spandau                                                  Bahnhof/Depot        52.534627 13.195621
+Berlin Ostbahnhof                                                       Bahnhof/Depot        52.510533 13.432365
+Komische Oper                                                           Theater/Bühne        52.515609 13.386866
+Staatsoper Unter den Linden                                             Theater/Bühne        52.516799 13.394760
+Konzerthaus Berlin                                                      Theater/Bühne        52.513644 13.391789
+Berliner Philharmonie                                                   Theater/Bühne        52.510000 13.370000
+Oper Berlin                                                             Theater/Bühne        52.511996 13.308396
+Friedrichstadt Palast                                                   Theater/Bühne        52.523930 13.388821
+Berliner Ensemble                                                       Theater/Bühne        52.522078 13.385960
+Maxim Gorki Theater                                                     Theater/Bühne        52.518889 13.395000
+Schiller Theater                                                        Theater/Bühne        52.511756 13.318298
+THEATER IM PALAIS                                                       Theater/Bühne        52.518558 13.395633
+Theater im Nikolaiviertel                                               Theater/Bühne        52.516675 13.407953
+TIPI AM KANZLERAMT                                                      Theater/Bühne        52.518577 13.367228
+Schlosspark Theater                                                     Theater/Bühne        52.454901 13.318074
+Waldbühne Berlin                                                        Theater/Bühne        52.515736 13.229014
+Freilichtbühne Wuhlheide                                                Theater/Bühne        52.462047 13.545383
+Wintergarten Varieté                                                    Theater/Bühne        52.502210 13.364570
+SIXX PAXX Theater                                                       Theater/Bühne        52.507097 13.377489
+Radialsystem                                                            Theater/Bühne        52.511044 13.431011
+Mercedes-Benz Arena Berlin                                              Theater/Bühne        52.506408 13.440493
+East Side Gallery                                                       Sehenswürdigkeit     52.506408 13.440493
+Alte Nationalgalerie                                                    Museum/Ausstellung   52.520810 13.398353
+Jüdisches Museum Berlin                                                 Museum/Ausstellung   52.502311 13.395447
+Deutsches Historisches Museum                                           Museum/Ausstellung   52.518152 13.396950
+Naturkundemuseum Berlin                                                 Museum/Ausstellung   52.530573 13.379175
+Pergamonmuseum Berlin                                                   Museum/Ausstellung   52.521183 13.396900
+Ägyptisches Museum                                                      Museum/Ausstellung   52.520638 13.396769
+Vorderasiatisches Museum                                                Museum/Ausstellung   52.520638 13.396769
+Museum für Islamische Kunst                                             Museum/Ausstellung   52.521188 13.397133
+James-Simon-Galerie                                                     Museum/Ausstellung   52.519922 13.397086
+Bodemuseum Berlin                                                       Museum/Ausstellung   52.521894 13.394257
+Altes Museum                                                            Museum/Ausstellung   52.519467 13.398745
+Neues Museum                                                            Museum/Ausstellung   52.520135 13.397646
+Museum Berggruen                                                        Museum/Ausstellung   52.519109 13.295314
+Museum Nikolaikirche                                                    Museum/Ausstellung   52.516835 13.407483
+Madame Tussauds Berlin                                                  Museum/Ausstellung   52.516889 13.381592
+Sammlung Scharf-Gerstenberg                                             Museum/Ausstellung   52.519202 13.296673
+Tchoban Museum                                                          Museum/Ausstellung   52.532118 13.410002
+Gemäldegalerie Berlin                                                   Museum/Ausstellung   52.509013 13.366014
+Neue Nationalgalerie                                                    Museum/Ausstellung   52.506995 13.367604
+Hamburger Bahnhof Berlin                                                Museum/Ausstellung   52.528440 13.372116
+DDR Museum                                                              Museum/Ausstellung   52.519608 13.402733
+Deutsches Technikmuseum                                                 Museum/Ausstellung   52.498698 13.377885
+Ethnologisches Museum                                                   Museum/Ausstellung   52.517240 13.401646
+Deutsches Spionagemuseum                                                Museum/Ausstellung   52.508768 13.379237
+Computerspielemuseum                                                    Museum/Ausstellung   52.517610 13.442000
+KÖRPERWELTEN Museum "Facetten des Lebens"                               Museum/Ausstellung   52.520830 13.409231
+Little BIG City Berlin                                                  Museum/Ausstellung   52.520806 13.409184
+Kupferstichkabinett Berlin                                              Museum/Ausstellung   52.508687 13.365246
+Museum Europäischer Kulturen                                            Museum/Ausstellung   52.456807 13.292088
+Urban Nation                                                            Museum/Ausstellung   52.501535 13.362655
+Käthe-Kollwitz-Museum                                                   Museum/Ausstellung   52.501710 13.326970
+Georg Kolbe Museum                                                      Museum/Ausstellung   52.509999 13.254874
+Liebermann-Villa am Wannsee                                             Museum/Ausstellung   52.429001 13.164620
+Labyrinth Kindermuseum Berlin                                           Museum/Ausstellung   52.556074 13.386001
+Berliner Unterwelten e.V.                                               Museum/Ausstellung   52.547797 13.388982
+Illuseum Berlin                                                         Museum/Ausstellung   52.521568 13.406989
+Berlin Dungeon                                                          Museum/Ausstellung   52.521464 13.403533
+DDR Museum: Motorrad                                                    Museum/Ausstellung   52.522930 13.407942
+Trabi-Museum                                                            Museum/Ausstellung   52.507481 13.388910
+Museum bildet                                                           Museum/Ausstellung   52.463132 13.287058
+Brücke-Museum                                                           Museum/Ausstellung   52.466822 13.274554
+Domäne Dahlem Freiluftmuseum                                            Museum/Ausstellung   52.458884 13.288348
+AlliiertenMuseum                                                        Museum/Ausstellung   52.455982 13.272484
+Botanisches Museum                                                      Museum/Ausstellung   52.454381 13.305602
+Museumsdorf Düppel Freilichtmuseum                                      Museum/Ausstellung   52.424960 13.234946
+KINDL - Zentrum für zeitgenössische Kunst                               Museum/Ausstellung   52.479445 13.430767
+Anna-Seghers-Museum                                                     Museum/Ausstellung   52.438160 13.540801
+Deutsch-Russisches Museum                                               Museum/Ausstellung   52.486261 13.539680
+Stasimuseum                                                             Museum/Ausstellung   52.514500 13.487516
+Musikinstrumenten-Museum                                                Museum/Ausstellung   52.510278 13.371111
+Kunstgewerbemuseum                                                      Museum/Ausstellung   52.509705 13.367400
+Dali - Die Ausstellung am Potsdamer Platz                               Museum/Ausstellung   52.508651 13.378564
+Mauermuseum - Museum Haus am Checkpoint Charlie                         Museum/Ausstellung   52.506942 13.390658
+Berlinische Galerie                                                     Museum/Ausstellung   52.503956 13.398158
+Deutsches Technikmuseum                                                 Museum/Ausstellung   52.498698 13.377885
+Science Center Spectrum                                                 Museum/Ausstellung   52.498101 13.379330
+Schwules Museum                                                         Museum/Ausstellung   52.504296 13.358218
+C/O Berlin                                                              Museum/Ausstellung   52.506602 13.330635
+Museum für Fotografie                                                   Museum/Ausstellung   52.508154 13.332137
+Villa Oppenheim                                                         Museum/Ausstellung   52.516010 13.298020
+OP Bunker Teichstrasse                                                  Museum/Ausstellung   52.572313 13.348614
+Berlin Story Bunker                                                     Museum/Ausstellung   52.502901 13.380390
+Museum Flucht und Vertreibung                                           Museum/Ausstellung   52.505149 13.381944
+Spandovia Sacra                                                         Museum/Ausstellung   52.538773 13.205582
+Militärhistorisches Museum Berlin-Gatow                                 Museum/Ausstellung   52.472549 13.138410
+Hanf Museum                                                             Museum/Ausstellung   52.516429 13.406097
+Zille Museum                                                            Museum/Ausstellung   52.516508 13.406374
+Märkisches Museum                                                       Museum/Ausstellung   52.513603 13.415012
+Museum für Kommunikation Berlin                                         Museum/Ausstellung   52.509952 13.387146
+Humboldt Universität                                                    Uni/Hoch-/Fachschule 52.517883 13.393655
+Technische Universität Berlin                                           Uni/Hoch-/Fachschule 52.512532 13.326945
+Freie Universität Berlin                                                Uni/Hoch-/Fachschule 52.452526 13.289679
+Rotes Rathaus                                                           Rathaus              52.518278 13.408644
+Rathaus Kreuzberg                                                       Rathaus              52.493664 13.385086
+Rathaus Lichtenberg                                                     Rathaus              52.515926 13.479581
+Rathaus Marzahn                                                         Rathaus              52.527447 13.540459
+Rathaus Mitte                                                           Rathaus              52.521204 13.422980
+Rathaus Neukölln                                                        Rathaus              52.481477 13.435066
+Rathaus Pankow                                                          Rathaus              52.569080 13.402417
+Rathaus Reinickendorf                                                   Rathaus              52.589049 13.324055
+Rathaus Spandau                                                         Rathaus              52.534920 13.200466
+Rathaus Steglitz                                                        Rathaus              52.456872 13.320665
+Rathaus Schöneberg                                                      Rathaus              52.484792 13.344153
+Köpenicker Rathaus                                                      Rathaus              52.445447 13.574710
+Rathaus Charlottenburg                                                  Rathaus (alt)        52.517545 13.308853
