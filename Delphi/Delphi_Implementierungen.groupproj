@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{119BADB4-9187-4D66-9EC4-D65B686E1F4A}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="Programm_AnsiString\Delphi_Vergleichsprogramm_AnsiString.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Programm_String\Delphi_Vergleichsprogramm_String.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="Delphi_Vergleichsprogramm_AnsiString">
+        <MSBuild Projects="Programm_AnsiString\Delphi_Vergleichsprogramm_AnsiString.dproj"/>
+    </Target>
+    <Target Name="Delphi_Vergleichsprogramm_AnsiString:Clean">
+        <MSBuild Projects="Programm_AnsiString\Delphi_Vergleichsprogramm_AnsiString.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Delphi_Vergleichsprogramm_AnsiString:Make">
+        <MSBuild Projects="Programm_AnsiString\Delphi_Vergleichsprogramm_AnsiString.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Delphi_Vergleichsprogramm_String">
+        <MSBuild Projects="Programm_String\Delphi_Vergleichsprogramm_String.dproj"/>
+    </Target>
+    <Target Name="Delphi_Vergleichsprogramm_String:Clean">
+        <MSBuild Projects="Programm_String\Delphi_Vergleichsprogramm_String.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Delphi_Vergleichsprogramm_String:Make">
+        <MSBuild Projects="Programm_String\Delphi_Vergleichsprogramm_String.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="Delphi_Vergleichsprogramm_AnsiString;Delphi_Vergleichsprogramm_String"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="Delphi_Vergleichsprogramm_AnsiString:Clean;Delphi_Vergleichsprogramm_String:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="Delphi_Vergleichsprogramm_AnsiString:Make;Delphi_Vergleichsprogramm_String:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
