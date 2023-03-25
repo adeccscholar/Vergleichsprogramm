@@ -86,8 +86,8 @@ increases/decreases in size), sorted in it, and all calculations are performed.
 
 * Berlin_App - Implementation with Visual C++
 * from Stream Evolution of C++ (Mostly Independend)
- * ChatGPT - created with the help of ChatGPT
- * Modern C++ - iterative created in the stream with modern C++ 
+  * ChatGPT - created with the help of ChatGPT
+  * Modern C++ - iterative created in the stream with modern C++ 
 
 # Delphi
 
