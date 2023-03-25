@@ -20,9 +20,10 @@
 #include <vector>
 #include <fstream>
 
-
-using namespace std::literals;
+#include <filesystem>
 namespace fs = std::filesystem;
+
+
 
 #define PI 3.14159265358979323846
 
@@ -102,7 +103,128 @@ auto BerechneChatGPT(data_vector& addresses, Location point) {
    }
 }
 
-auto TestchatGPT(data_vector& addresses, std::string const& strFilename) {
+void deleteDirectory(const std::string& path) {
+   if (std::filesystem::exists(path)) {
+      for (const auto& entry : std::filesystem::directory_iterator(path)) {
+         if (entry.is_directory()) {
+            deleteDirectory(entry.path().string());
+         }
+         else {
+            std::filesystem::remove(entry.path());
+         }
+      }
+      std::filesystem::remove(path);
+   }
+}
+
+void writeAddressesToDirectories(const std::string& root_dir, const data_vector& addresses) {
+   // create a root directory for all cities
+   std::filesystem::create_directory(root_dir);
+
+   for (const auto& [address, result] : addresses) {
+      std::string dir = root_dir + "\\" + address.City() + "\\" + address.UrbanUnit() + "\\" + address.District();
+      std::filesystem::create_directories(dir);  // Koorigiert, da alle Verzeichnisse erstellt werden müssen
+
+      // open file with name of street
+      std::ofstream file(dir + "\\" + address.Street() + ".csv", std::ios::app);
+      file.setf(std::ios::fixed);
+      file.setf(std::ios::showpoint);
+
+      // write address data to file
+      file << address.StreetNumber() << ";" << address.ZipCode() << ";" << address.UrbanUnit_Old() << ";"
+           << std::setprecision(9) << address.Longitude() << ";" << std::setprecision(9) << address.Latitude()
+           << ";" << std::setprecision(3) << result.first << ";" << std::setprecision(3) << result.second
+           << std::endl;
+      file.close();
+      }
+   }
+
+
+void readAddressesFromDirectory(std::string directoryPath, data_vector& addresses) {
+   addresses.clear();
+   addresses.shrink_to_fit();
+
+   //data_vector addresses;
+
+   for (const auto& cityDir : std::filesystem::directory_iterator(directoryPath)) {
+      if (!std::filesystem::is_directory(cityDir)) {
+         continue;
+      }
+      std::string cityName = cityDir.path().filename().string();
+
+      for (const auto& unitDir : std::filesystem::directory_iterator(cityDir.path())) {
+         if (!std::filesystem::is_directory(unitDir)) {
+            continue;
+         }
+         std::string unitName = unitDir.path().filename().string();
+
+         for (const auto& districtDir : std::filesystem::directory_iterator(unitDir.path())) {
+            if (!std::filesystem::is_directory(districtDir)) {
+               continue;
+            }
+            std::string districtName = districtDir.path().filename().string();
+
+            for (const auto& file : std::filesystem::directory_iterator(districtDir.path())) {
+               if (!std::filesystem::is_regular_file(file)) {
+                  continue;
+               }
+               std::string filename = file.path().filename().string();
+               std::string streetName = filename.substr(0, filename.find(".csv"));
+
+               std::ifstream infile(file.path());
+               std::string line;
+               while (std::getline(infile, line)) {
+                  std::stringstream ss(line);
+                  std::string data;
+                  TData address;
+                  Result result;
+                  address.City(cityName);
+                  address.UrbanUnit(unitName);
+                  address.District(districtName);
+                  address.Street(streetName);
+                  int count = 0;
+                  while (std::getline(ss, data, ';')) {
+                     count++;
+                     if (count == 1) {
+                        address.StreetNumber(data);
+                     }
+                     else if(count == 2) {
+                        address.ZipCode(data);
+                     }
+                     else if(count == 3) {
+                        address.UrbanUnit_Old(data);
+                     }
+                     else if (count == 4) {
+                        double flTmp;
+                        std::istringstream(data) >> flTmp;
+                        address.Latitude(flTmp);
+                     }
+                     else if (count == 5) {
+                        double flTmp;
+                        std::istringstream(data) >> flTmp;
+                        address.Longitude(flTmp);
+                     }
+                     else if (count == 6) {
+                        std::istringstream(data) >> result.first;
+                     }
+                     else if (count == 7) {
+                        std::istringstream(data) >> result.second;
+                     }
+                  }
+                  addresses.push_back( { address, result } );
+               }
+            }
+         }
+      }
+   }
+  // return addresses;
+}
+
+void SortChatGPT_DIN5007(data_vector& vData) {
+   std::sort(vData.begin(), vData.end(), [](auto const& lhs, auto const& rhs) { return lhs.first.CompareDIN5007(rhs.first);  });
+   }
+
+auto ReadChatGPT(data_vector& addresses, std::string const& strFilename) {
    addresses.clear();
    std::ifstream infile(strFilename);  // Datei öffnen
    if (!infile) {
@@ -237,7 +359,7 @@ void Rechentest(std::string const& strFilename) {
    static const int    time_prec = 6;
    auto func_start = std::chrono::high_resolution_clock::now();
    data_vector vData;
-   TestchatGPT(vData, strFilename);
+   ReadChatGPT(vData, strFilename);
    
    auto func_ende = std::chrono::high_resolution_clock::now();
    auto runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
@@ -246,7 +368,7 @@ void Rechentest(std::string const& strFilename) {
 
 
    func_start = std::chrono::high_resolution_clock::now();
-   std::sort(vData.begin(), vData.end(), [](auto const& lhs, auto const& rhs) { return lhs.first.CompareDIN5007(rhs.first);  });
+   SortChatGPT_DIN5007(vData);
    func_ende = std::chrono::high_resolution_clock::now();
    runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
    std::cout << vData.size() << " datasets sorted in "
@@ -260,7 +382,7 @@ void Rechentest(std::string const& strFilename) {
    std::cout << vData.size() << " datasets calculated in "
       << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
 
-   std::string strOutput = "D:\\Test\\Testausgabe_alle.txt"s;
+   std::string strOutput = "D:\\Test\\Testausgabe_alle.txt";
    func_start = std::chrono::high_resolution_clock::now();
    WriteChatGPT(vData, strOutput);
    func_ende = std::chrono::high_resolution_clock::now();
@@ -268,7 +390,31 @@ void Rechentest(std::string const& strFilename) {
    std::cout << vData.size() << " datasets wrote to \"" << strOutput << "\" in "
       << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
 
-   strOutput = "D:\\Test\\Testausgabe.txt"s;
+
+   std::string strDirectory = "D:\\Test\\ChatGPT";
+   func_start = std::chrono::high_resolution_clock::now();
+   deleteDirectory(strDirectory);
+   func_ende = std::chrono::high_resolution_clock::now();
+   runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
+   std::cout << vData.size() << " delete Directory \"" << strDirectory << "\" in "
+      << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
+
+   func_start = std::chrono::high_resolution_clock::now();
+   writeAddressesToDirectories(strDirectory, vData);
+   func_ende = std::chrono::high_resolution_clock::now();
+   runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
+   std::cout << vData.size() << " wrote to Directory \"" << strDirectory << "\" in "
+      << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
+
+   func_start = std::chrono::high_resolution_clock::now();
+   readAddressesFromDirectory(strDirectory, vData);
+   func_ende = std::chrono::high_resolution_clock::now();
+   runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
+   std::cout << vData.size() << " read from Directory \"" << strDirectory << "\" in "
+      << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
+
+
+   strOutput = "D:\\Test\\Testausgabe.txt";
 
    func_start = std::chrono::high_resolution_clock::now();
    auto val = pushMatchingToFront(vData, 1000.0);
@@ -298,7 +444,7 @@ int main() {
    std::cout.setf(std::ios::showpoint);
    std::cout.setf(std::ios::fixed);
 
-   std::string strInput = "D:\\Test\\berlin_infos.dat"s;
+   std::string strInput = "D:\\Test\\berlin_infos.dat";
    Rechentest(strInput);
    #if defined __BORLANDC__
    std::cout << "... press a key ...";
