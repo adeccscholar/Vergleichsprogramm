@@ -25,38 +25,34 @@ inline std::ostream& operator << (std::ostream& out, Location<ty> const& data) {
 
 */
 
-template <typename ty>
-struct Location : public std::pair<ty, ty> {
-   friend std::ostream& operator << (std::ostream& out, Location<ty> const& data) {
-      out << "(" << data.first << ", " << data.second << ")";
-      return out;
-      }
+class Location {
+   friend std::ostream& operator << (std::ostream& out, Location const& data);
+   friend void swap(Location& lhs, Location& rhs) noexcept { lhs.swap(rhs); }
 
-   friend void swap(Location& lhs, Location&rhs) {
-      swap(static_cast<std::pair<ty, ty>&>(lhs), static_cast<std::pair<ty, ty>&>(rhs));
-      }
+private:
+   double flLatitude;
+   double flLongitude;
 
-   Location(ty const& a, ty const& b) {
-      static_assert(std::is_floating_point<ty>::value == true, "wrong type for Location");
-      this->first = a; this->second = b;
-      }
+public:
+   
+   Location(double const& a, double const& b);
 
    Location(void) : Location(0.0, 0.0) { }
    Location(Location const&) = default;
    Location(Location&& ref) = default;
 
-   Location& operator = (Location const& ref) {
-      this->first = ref.first;
-      this->second = ref.second;
-      return *this;
-      }
+   Location& operator = (Location const& ref);
+   void swap(Location& ref) noexcept;
 
-   ty Latitude() const { return this->first;  }
-   ty Longitude() const { return this->second; }
+   double const& Latitude() const { return flLatitude;  }
+   double const& Longitude() const { return flLongitude; }
+
+   void Latitude(double const& newVal) { flLatitude = newVal; }
+   void Longitude(double const& newVal) { flLongitude = newVal; }
+
 };
 
 
-template <typename ty, std::enable_if_t<std::is_floating_point<ty>::value, bool> = true>
-using Result = std::pair<ty, ty>;
+using Result = std::pair<double, double>;
 
 

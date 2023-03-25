@@ -11,33 +11,20 @@
 
 #include "MyData.h"
 #include "Tool_Helper.h"
-#include "MyFileIterator.h"
 
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <utility>
 #include <string>
-#include <string_view> // !! C++17
 #include <vector>
-#include <array>
 #include <fstream>
-#include <functional>
-#include <execution> // !! C++17
-#include <iterator>
-#include <optional> // !! C++17
-#include <atomic>
-#include <filesystem>
-#include <thread>
-#include <future>
 
 
 using namespace std::literals;
 namespace fs = std::filesystem;
 
 #define PI 3.14159265358979323846
-#define R 6371000 // Erdradius in Metern
-
 
 // Funktion zur Konvertierung von Grad in Radian
 double deg2rad(double deg) {
@@ -48,22 +35,12 @@ double rad2deg(double rad) {
 }
 
 // Funktion zur Berechnung des Abstands zwischen zwei Positionen in Metern
-double distance_1(Location<double> pos1, Location<double> pos2) {
-   double dlon = deg2rad(pos2.Longitude() - pos1.Longitude());
-   double dlat = deg2rad(pos2.Latitude() - pos1.Latitude());
-
-   double a = pow(sin(dlat / 2), 2) + cos(deg2rad(pos1.Latitude())) * cos(deg2rad(pos2.Latitude())) * pow(sin(dlon / 2), 2);
-   double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-   double distance = R * c;
-   return distance;
-   }
-
-double distance(Location<double> pos1, Location<double> pos2) {
+double distance(Location pos1, Location pos2) {
    double r = 6371e3; // Erdradius in Metern
-   double lat1 = pos1.Latitude() * PI / 180.0; // Umwandlung in Radiant
-   double lat2 = pos2.Latitude() * PI / 180.0;
-   double dLat = (pos2.Latitude() - pos1.Latitude()) * PI / 180.0;
-   double dLon = (pos2.Longitude() - pos1.Longitude()) * PI / 180.0;
+   double lat1 = deg2rad(pos1.Latitude()); // Umwandlung in Radiant
+   double lat2 = deg2rad(pos2.Latitude());
+   double dLat = deg2rad(pos2.Latitude() - pos1.Latitude());
+   double dLon = deg2rad(pos2.Longitude() - pos1.Longitude());
 
    double a = sin(dLat / 2) * sin(dLat / 2) + cos(lat1) * cos(lat2) * sin(dLon / 2) * sin(dLon / 2);
    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
@@ -72,26 +49,15 @@ double distance(Location<double> pos1, Location<double> pos2) {
    }
 
 // Funktion zur Berechnung des Kurswinkels von Position 1 zu Position 2
-double bearing_1(Location<double> pos1, Location<double> pos2) {
-   double dlon = deg2rad(pos2.Longitude() - pos1.Longitude());
-   double lat1 = deg2rad(pos1.Latitude());
+double bearing(Location pos1, Location pos2) {
+   double lat1 = deg2rad(pos1.Latitude()); // Umwandlung in Radiant
    double lat2 = deg2rad(pos2.Latitude());
-
-   double y = sin(dlon) * cos(lat2);
-   double x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dlon);
-   double bearing = atan2(y, x);
-   return rad2deg(bearing);
-   }
-
-double bearing(Location<double> pos1, Location<double> pos2) {
-   double lat1 = pos1.Latitude() * PI / 180.0; // Umwandlung in Radiant
-   double lat2 = pos2.Latitude() * PI / 180.0;
-   double dLon = (pos2.Longitude() - pos1.Longitude()) * PI / 180.0;
+   double dLon = deg2rad(pos2.Longitude() - pos1.Longitude());
 
    double y = sin(dLon) * cos(lat2);
    double x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
 
-   double bearing = atan2(y, x) * 180.0 / PI;
+   double bearing = rad2deg(atan2(y, x));
 
    // Korrektur des Winkels auf den Bereich von 0 bis 360 Grad
    bearing = fmod(bearing + 360.0, 360.0);
@@ -100,8 +66,8 @@ double bearing(Location<double> pos1, Location<double> pos2) {
 }
 
 
-int pushMatchingToFront(data_vector<double>& addresses, double matchValue) {
-   int i = 0, j = addresses.size() - 1;
+int pushMatchingToFront(data_vector& addresses, double matchValue) {
+   int i = 0, j = static_cast<int>(addresses.size()) - 1;
    while (i < j) {
       if (addresses[i].second.first < matchValue) {
          i++;
@@ -116,7 +82,7 @@ int pushMatchingToFront(data_vector<double>& addresses, double matchValue) {
    return i; // (v[i] == matchValue) ? i + 1 : i;
 }
 
-void sortAddressesInRange(data_vector<double>& addresses, int endIndex) {
+void sortAddressesInRange(data_vector& addresses, int endIndex) {
    sort(addresses.begin(), addresses.begin() + endIndex, [](const auto& a1, const auto& a2) {
       if (a1.second.first != a2.second.first) {
          return a1.second.first > a2.second.first; // Sortiere absteigend nach Entfernung
@@ -127,7 +93,7 @@ void sortAddressesInRange(data_vector<double>& addresses, int endIndex) {
       });
    }
 
-auto BerechneChatGPT(data_vector<double>& addresses, Location<double> point) {
+auto BerechneChatGPT(data_vector& addresses, Location point) {
    for (auto& [address, result] : addresses) {
       double dist = distance( point, { address.Latitude(), address.Longitude() });
       result.first = dist;
@@ -136,7 +102,7 @@ auto BerechneChatGPT(data_vector<double>& addresses, Location<double> point) {
    }
 }
 
-auto TestchatGPT(data_vector<double>& addresses, std::string const& strFilename) {
+auto TestchatGPT(data_vector& addresses, std::string const& strFilename) {
    addresses.clear();
    std::ifstream infile(strFilename);  // Datei öffnen
    if (!infile) {
@@ -145,7 +111,7 @@ auto TestchatGPT(data_vector<double>& addresses, std::string const& strFilename)
    }
    std::string line;
    while (getline(infile, line)) {  // Zeilenweise Daten einlesen
-      TData<double> address;
+      TData address;
 
       // Daten aus der Zeile auslesen
       size_t pos = 0;
@@ -232,14 +198,13 @@ auto TestchatGPT(data_vector<double>& addresses, std::string const& strFilename)
 }
 
 
-auto WriteChatGPT(data_vector<double> const& addresses, std::string const& strFilename, int count = -1) {
+auto WriteChatGPT(data_vector const& addresses, std::string const& strFilename, int count = -1) {
    // Datei für die Ausgabe öffnen
    std::ofstream outfile(strFilename);
    if (!outfile) {
       std::cerr << "Die Datei konnte nicht geöffnet werden." << std::endl;
       return 1;
       }
-   //outfile.imbue(std::locale("de_DE"));
 
    // Adressen in die Ausgabedatei schreiben
    std::locale german(std::locale("de_DE"));
@@ -271,7 +236,7 @@ void Rechentest(std::string const& strFilename) {
    static const double time_factor = 1000000.;
    static const int    time_prec = 6;
    auto func_start = std::chrono::high_resolution_clock::now();
-   data_vector<double> vData;
+   data_vector vData;
    TestchatGPT(vData, strFilename);
    
    auto func_ende = std::chrono::high_resolution_clock::now();
@@ -288,7 +253,7 @@ void Rechentest(std::string const& strFilename) {
       << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
 
    func_start = std::chrono::high_resolution_clock::now();
-   Location<double> point = { 52.520803, 13.40945 };
+   Location point = { 52.520803, 13.40945 };
    BerechneChatGPT(vData, point);
    func_ende = std::chrono::high_resolution_clock::now();
    runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
