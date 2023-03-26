@@ -51,6 +51,7 @@ public:
 
    // Compare the Addresses with DIN 5007-2 Norm, Streetnumber with numeric part and addition
    bool CompareDIN5007(TAddress const& other) const;
+   bool CompareDIN5007_Var2(TAddress const& other) const;
 
    /// /name Selektoren
    /// {

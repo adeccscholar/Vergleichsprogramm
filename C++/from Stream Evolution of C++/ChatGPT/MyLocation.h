@@ -6,6 +6,35 @@
 
 //#define WITH_MOVE
 
+class Result {
+   friend std::ostream& operator << (std::ostream& out, Result const& data);
+#if defined WITH_MOVE
+   friend void swap(Result& lhs, Result& rhs) noexcept { lhs.swap(rhs); }
+#endif
+private:
+   double flDistance;
+   double flAngle;
+public:
+   Result(double const& a, double const& b);
+   Result(void) : Result(0.0, 0.0) { }
+   Result(Result const&) = default;
+#if defined WITH_MOVE
+   Result(Result&& ref) = default;
+#endif
+   Result& operator = (Result const& ref);
+#if defined WITH_MOVE
+   Result& operator = (Result&& ref) noexcept;
+   void swap(Result& ref) noexcept;
+#endif
+   double const& Distance() const { return flDistance; }
+   double const& Angle() const { return flAngle; }
+
+   void Distance(double const& newVal) { flDistance = newVal; }
+   void Angle(double const& newVal) { flAngle = newVal; }
+
+};
+
+
 class Location {
    friend std::ostream& operator << (std::ostream& out, Location const& data);
 #if defined WITH_MOVE
@@ -33,35 +62,13 @@ public:
    void Latitude(double const& newVal) { flLatitude = newVal; }
    void Longitude(double const& newVal) { flLongitude = newVal; }
 
-};
-
-class Result {
-   friend std::ostream& operator << (std::ostream& out, Result const& data);
-#if defined WITH_MOVE
-   friend void swap(Result& lhs, Result& rhs) noexcept { lhs.swap(rhs); }
-#endif
+   double distance(Location pos) const;
+   double bearing(Location pos) const;
 private:
-   double flDistance;
-   double flAngle;
-public:
-   Result(double const& a, double const& b);
-   Result(void) : Result(0.0, 0.0) { }
-   Result(Result const&) = default;
-#if defined WITH_MOVE
-   Result(Result&& ref) = default;
-#endif
-   Result& operator = (Result const& ref);
-#if defined WITH_MOVE
-   Result& operator = (Result&& ref) noexcept ;
-   void swap(Result& ref) noexcept;
-#endif
-   double const& Distance() const { return flDistance; }
-   double const& Angle() const { return flAngle; }
-
-   void Distance(double const& newVal) { flDistance = newVal; }
-   void Angle(double const& newVal) { flAngle = newVal; }
-
+   static double deg2rad(double deg);
+   static double rad2deg(double rad);
 };
+
 
 
 

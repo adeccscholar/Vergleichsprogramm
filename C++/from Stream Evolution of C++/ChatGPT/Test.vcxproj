@@ -134,12 +134,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ChatGPT.cpp" />
     <ClCompile Include="MyAddress.cpp" />
     <ClCompile Include="MyData.cpp" />
     <ClCompile Include="MyLocation.cpp" />
     <ClCompile Include="Test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ChatGPT.h" />
     <ClInclude Include="MyAddress.h" />
     <ClInclude Include="MyData.h" />
     <ClInclude Include="MyFileIterator.h" />
