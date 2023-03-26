@@ -6,6 +6,16 @@
 
 using namespace std::literals;
 
+TAddress& TAddress::operator = (TAddress const& ref) {
+   copy(ref);
+   return *this;
+}
+
+#if defined WITH_MOVE
+TAddress& TAddress::operator = (TAddress&& ref) noexcept {
+   swap(ref);
+   return *this;
+}
 
 void TAddress::swap(TAddress& ref) noexcept {
    using std::swap;
@@ -17,7 +27,19 @@ void TAddress::swap(TAddress& ref) noexcept {
    swap(strUrbanUnit_Old, ref.strUrbanUnit_Old);
    swap(strDistrict, ref.strDistrict);
 }
+#endif
 
+TAddress* TAddress::create() {
+   return new TAddress;
+   }
+
+void TAddress::init() {
+   _init();
+   }
+
+void TAddress::copy(TAddress const& ref) {
+   _copy(ref);
+   }
 
 void TAddress::_init(void) {
    strCity = ""s;

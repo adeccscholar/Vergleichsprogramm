@@ -4,11 +4,15 @@
 #include <string_view>
 #include <functional>
 
+//#define WITH_MOVE
+
 /**
  * @brief Address or cadastral data
 */
 class TAddress {
+#if defined WITH_MOVE
    friend void swap(TAddress& lhs, TAddress& rhs) noexcept { lhs.swap(rhs); }
+#endif
 private:
    std::string strCity = "";  ///< Stadt, an der sich die Adresse befindet
    std::string strStreet = "";  ///< Straße zu dieser Adresse
@@ -27,32 +31,23 @@ public:
       _copy(ref);
    }
 
-   
+#if defined WITH_MOVE
    TAddress(TAddress&& ref) noexcept {
       swap(ref);
    }
-   
+#endif   
 
    virtual ~TAddress(void) = default;
 
-   virtual TAddress* create() { return new TAddress; }
+   virtual TAddress* create();
 
-   TAddress& operator = (TAddress const& ref) {
-      copy(ref);
-      return *this;
-      }
-
-   
-   TAddress& operator = (TAddress&& ref) noexcept {
-      swap(ref);
-      return *this;
-      }
-   
-
+   TAddress& operator = (TAddress const& ref);
+#if defined WITH_MOVE
+   TAddress& operator = (TAddress&& ref) noexcept;
    void swap(TAddress& ref) noexcept;
-
-   virtual void init() { _init(); }
-   virtual void copy(TAddress const& ref) { _copy(ref); }
+#endif
+   virtual void init();
+   virtual void copy(TAddress const& ref);
 
    // Compare the Addresses with DIN 5007-2 Norm, Streetnumber with numeric part and addition
    bool CompareDIN5007(TAddress const& other) const;
@@ -76,29 +71,10 @@ public:
    void UrbanUnit_Old(std::string const& newVal) { strUrbanUnit_Old = newVal; }
    void District(std::string const& newVal) { strDistrict = newVal; }
 
-   void City(std::string&& newVal) { strCity = std::forward<std::string>(newVal); }
-   void Street(std::string&& newVal) { strStreet = std::forward<std::string>(newVal); }
-   void StreetNumber(std::string&& newVal) { strStreetNumber = std::forward<std::string>(newVal); }
-   void ZipCode(std::string&& newVal) { strZipCode = std::forward<std::string>(newVal); }
-   void UrbanUnit(std::string&& newVal) { strUrbanUnit = std::forward<std::string>(newVal); }
-   void UrbanUnit_Old(std::string&& newVal) { strUrbanUnit_Old = std::forward<std::string>(newVal); }
-   void District(std::string&& newVal) { strDistrict = std::forward<std::string>(newVal); }
-
-   /// Manipulatoren 
-   void City(std::string_view const& newVal) { strCity = std::move(std::string{ newVal.data(), newVal.size() }); }
-   void Street(std::string_view const& newVal) { strStreet = std::move(std::string{ newVal.data(), newVal.size() }); }
-   void StreetNumber(std::string_view const& newVal) { strStreetNumber = std::move(std::string{ newVal.data(), newVal.size() }); }
-   void ZipCode(std::string_view const& newVal) { strZipCode = std::move(std::string{ newVal.data(), newVal.size() }); }
-   void UrbanUnit(std::string_view const& newVal) { strUrbanUnit = std::move(std::string{ newVal.data(), newVal.size() }); }
-   void UrbanUnit_Old(std::string_view const& newVal) { strUrbanUnit_Old = std::move(std::string{ newVal.data(), newVal.size() }); }
-   void District(std::string_view const& newVal) { strDistrict = std::move(std::string{ newVal.data(), newVal.size() }); }
-
-
 private:
    void _init(void);
    void _copy(TAddress const& ref);
  
-
    static std::string normalizeDIN(std::string const& strText);
    static void Parse_StreetNumber(std::string const& strInput, int& streetnumber, std::string& addition);
 };

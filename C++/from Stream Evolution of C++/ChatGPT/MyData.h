@@ -2,53 +2,33 @@
 
 #include "MyAddress.h"
 #include "MyLocation.h"
-#include "Tool_Helper.h"
 
 #include <iomanip>
-#include <algorithm>
-#include <charconv>
 #include <vector>
-#include <execution>
 
 class TData : public TAddress {
+#if defined WITH_MOVE
    friend void swap(TData& lhs, TData& rhs) noexcept { lhs.swap(rhs);  }
+#endif
 private:
    Location mLoc;
 public:
-   TData(void) : TAddress() { _init(); }
-   TData(TData const& ref) : TAddress(ref) { _copy(ref); }
-
-   TData(TData&& ref) noexcept : TAddress(ref) { swap(ref); }
-
+   TData(void);
+   TData(TData const& ref);
+#if defined WITH_MOVE
+   TData(TData&& ref) noexcept;
+#endif
    virtual ~TData(void) override { }
+   TData& operator = (TData const& ref);
 
-   TData& operator = (TData const& ref) {
-      copy(ref);
-      return *this;
-   }
+#if defined WITH_MOVE   
+   TData& operator = (TData&& ref) noexcept;
+   void swap(TData& ref) noexcept;
+#endif
 
-   
-   TData& operator = (TData&& ref) noexcept {
-      swap(ref);
-      return *this;
-      }
-   
-
-   void swap(TData& ref) {
-      TAddress::swap(static_cast<TAddress&>(ref));
-      using std::swap;
-      swap(mLoc, ref.mLoc);
-      }
-
-   virtual TAddress* create() override { return new TData; }
-   virtual void init(void) override { TAddress::init();  _init(); };
-   virtual void copy(TAddress const& ref) override {
-      TAddress::copy(ref);
-      try {
-         _copy(dynamic_cast<TData const&>(ref));
-      }
-      catch (std::bad_cast&) { ; }
-   }
+   virtual TAddress* create() override;
+   virtual void init(void) override;
+   virtual void copy(TAddress const& ref) override;
 
    operator Location& () { return mLoc; }
    operator Location const& () const { return mLoc; }
@@ -61,8 +41,8 @@ public:
    void Longitude(double const& newVal) { mLoc.Longitude(newVal); }
 
 private:
-   void _init(void) { mLoc = { 0.0, 0.0 }; }
-   void _copy(TData const& ref) { mLoc = ref.mLoc; }
+   void _init(void);
+   void _copy(TData const& ref);
 };
 
 using data_vector = std::vector<std::pair<TData, Result>>;

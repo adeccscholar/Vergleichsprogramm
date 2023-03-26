@@ -10,7 +10,6 @@
 */
 
 #include "MyData.h"
-#include "Tool_Helper.h"
 
 #include <iostream>
 #include <iomanip>
@@ -71,10 +70,10 @@ double bearing(Location pos1, Location pos2) {
 int pushMatchingToFront(data_vector& addresses, double matchValue) {
    int i = 0, j = static_cast<int>(addresses.size()) - 1;
    while (i < j) {
-      if (addresses[i].second.first < matchValue) {
+      if (addresses[i].second.Distance() < matchValue) {
          i++;
       }
-      else if (addresses[j].second.first >= matchValue) {
+      else if (addresses[j].second.Distance() >= matchValue) {
          j--;
       }
       else {
@@ -86,11 +85,11 @@ int pushMatchingToFront(data_vector& addresses, double matchValue) {
 
 void sortAddressesInRange(data_vector& addresses, int endIndex) {
    sort(addresses.begin(), addresses.begin() + endIndex, [](const auto& a1, const auto& a2) {
-      if (a1.second.first != a2.second.first) {
-         return a1.second.first > a2.second.first; // Sortiere absteigend nach Entfernung
+      if (a1.second.Distance() != a2.second.Distance()) {
+         return a1.second.Distance() > a2.second.Distance(); // Sortiere absteigend nach Entfernung
       }
       else {
-         return a1.second.second < a2.second.second; // Sortiere aufsteigend nach Kurswinkel
+         return a1.second.Angle() < a2.second.Angle(); // Sortiere aufsteigend nach Kurswinkel
       }
       });
 }
@@ -98,9 +97,9 @@ void sortAddressesInRange(data_vector& addresses, int endIndex) {
 auto BerechneChatGPT(data_vector& addresses, Location const& point) {
    for (auto& [address, result] : addresses) {
       double dist = distance(point, { address.Latitude(), address.Longitude() });
-      result.first = dist;
+      result.Distance(dist);
       double angle = bearing({ address.Latitude(), address.Longitude() }, point);
-      result.second = fmod(360.0 - angle, 360.0); // Kurswinkel als Komplement des Azimuts
+      result.Angle(fmod(360.0 - angle, 360.0)); // Kurswinkel als Komplement des Azimuts
    }
 }
 
@@ -134,7 +133,7 @@ void writeAddressesToDirectories(const std::string& root_dir, const data_vector&
       // write address data to file
       file << address.StreetNumber() << ";" << address.ZipCode() << ";" << address.UrbanUnit_Old() << ";"
          << std::setprecision(9) << address.Longitude() << ";" << std::setprecision(9) << address.Latitude()
-         << ";" << std::setprecision(3) << result.first << ";" << std::setprecision(3) << result.second
+         << ";" << std::setprecision(3) << result.Distance() << ";" << std::setprecision(3) << result.Angle()
          << std::endl;
       file.close();
    }
@@ -198,7 +197,7 @@ void write_addresses_to_directory_sorted(const std::string& root_dir, data_vecto
       // Write address data to file
       file << address.StreetNumber() << ";" << address.ZipCode() << ";" << address.UrbanUnit_Old() << ";"
          << std::setprecision(9) << address.Longitude() << ";" << std::setprecision(9) << address.Latitude()
-         << ";" << std::setprecision(3) << result.first << ";" << std::setprecision(3) << result.second
+         << ";" << std::setprecision(3) << result.Distance() << ";" << std::setprecision(3) << result.Angle()
          << std::endl;
 
       // Update previous values
@@ -280,10 +279,14 @@ void readAddressesFromDirectory(std::string directoryPath, data_vector& addresse
                         address.Longitude(flTmp);
                      }
                      else if (count == 6) {
-                        std::istringstream(data) >> result.first;
+                        double flTmp;
+                        std::istringstream(data) >> flTmp;
+                        result.Distance(flTmp);
                      }
                      else if (count == 7) {
-                        std::istringstream(data) >> result.second;
+                        double flTmp;
+                        std::istringstream(data) >> flTmp;
+                        result.Angle(flTmp);
                      }
                   }
                   addresses.push_back({ address, result });
@@ -414,8 +417,8 @@ void WriteChatGPT(data_vector const& addresses, std::string const& strFilename, 
          << address.Street() << " " << address.StreetNumber()
          << " -> (" << std::fixed << std::setprecision(9) << address.Latitude()
          << ", " << std::fixed << std::setprecision(9) << address.Longitude() << ")"
-         << " -> " << std::fixed << std::setprecision(3) << distance.first << "m"
-         << " in " << std::fixed << std::setprecision(1) << distance.second << "°\n";
+         << " -> " << std::fixed << std::setprecision(3) << distance.Distance() << "m"
+         << " in " << std::fixed << std::setprecision(1) << distance.Angle() << "°\n";
       std::string line = line_stream.str();
       // Zeile in die Datei schreiben
       outfile << line;
