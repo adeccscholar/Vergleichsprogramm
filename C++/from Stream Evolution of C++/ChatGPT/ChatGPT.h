@@ -5,8 +5,8 @@
 
 class TChatGPT {
 public:
-   static void read_from_File(data_vector& addresses, std::string const& strFilename);
-   static void write_to_File(data_vector const& addresses, std::string const& strFilename, int count = -1);
+   static void read_addresses_from_file(data_vector& addresses, std::string const& strFilename);
+   static void write_addresses_to_file(data_vector const& addresses, std::string const& strFilename, int count = -1);
    static void calculate_addresses(data_vector& addresses, Location const& point);
    static void sort_DIN5007(data_vector& addresses);
    static void sort_DIN5007_Var2(data_vector& addresses);
@@ -18,7 +18,7 @@ public:
 
    static void delete_addresses(data_vector& addresses);
 
-   static int  pushMatchingToFront(data_vector& addresses, double matchValue);
-   static void sortAddressesInRange(data_vector& addresses, int endIndex);
+   static int  push_matching_to_front(data_vector& addresses, double matchValue);
+   static void sort_addresses_in_range(data_vector& addresses, int endIndex);
 
 };

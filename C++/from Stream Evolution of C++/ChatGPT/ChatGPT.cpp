@@ -5,10 +5,11 @@
 #include <iomanip>
 #include <algorithm>
 #include <filesystem>
+#include <stdexcept>
 
 namespace fs = std::filesystem;
 
-int TChatGPT::pushMatchingToFront(data_vector& addresses, double matchValue) {
+int TChatGPT::push_matching_to_front(data_vector& addresses, double matchValue) {
    int i = 0, j = static_cast<int>(addresses.size()) - 1;
    while (i < j) {
       if (addresses[i].second.Distance() < matchValue) {
@@ -24,7 +25,7 @@ int TChatGPT::pushMatchingToFront(data_vector& addresses, double matchValue) {
    return i; // (v[i] == matchValue) ? i + 1 : i;
 }
 
-void TChatGPT::sortAddressesInRange(data_vector& addresses, int endIndex) {
+void TChatGPT::sort_addresses_in_range(data_vector& addresses, int endIndex) {
    sort(addresses.begin(), addresses.begin() + endIndex, [](const auto& a1, const auto& a2) {
       if (a1.second.Distance() != a2.second.Distance()) {
          return a1.second.Distance() > a2.second.Distance(); // Sortiere absteigend nach Entfernung
@@ -246,7 +247,7 @@ void TChatGPT::sort_DIN5007_Var2(data_vector& addresses) {
    std::sort(addresses.begin(), addresses.end(), [](auto const& lhs, auto const& rhs) { return lhs.first.CompareDIN5007_Var2(rhs.first);  });
 }
 
-void TChatGPT::read_from_File(data_vector& addresses, std::string const& strFilename) {
+void TChatGPT::read_addresses_from_file(data_vector& addresses, std::string const& strFilename) {
    addresses.clear();
    std::ifstream infile(strFilename);  // Datei öffnen
    if (!infile) {
@@ -341,7 +342,7 @@ void TChatGPT::read_from_File(data_vector& addresses, std::string const& strFile
 }
 
 
-void TChatGPT::write_to_File(data_vector const& addresses, std::string const& strFilename, int count) {
+void TChatGPT::write_addresses_to_file(data_vector const& addresses, std::string const& strFilename, int count) {
    // Datei für die Ausgabe öffnen
    std::ofstream outfile(strFilename);
    if (!outfile) {

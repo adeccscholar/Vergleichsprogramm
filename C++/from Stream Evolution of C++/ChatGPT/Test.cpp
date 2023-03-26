@@ -34,7 +34,7 @@ void Rechentest(std::string const& strFilename) {
 
    std::vector<std::tuple<std::string, std::string, std::function<void()>, std::function<std::optional<size_t>()>>> test_funcs = {
       { "read file " + strFilename, "datasets read from file",
-            std::bind(TChatGPT::read_from_File, std::ref(vData), std::cref(strFilename)),
+            std::bind(TChatGPT::read_addresses_from_file, std::ref(vData), std::cref(strFilename)),
             [&vData]() { return std::optional<size_t>(vData.size()); } },
       { "sort data", "datasets sorted in vector",
             //std::bind(TChatGPT::sort_DIN5007, std::ref(vData)),
@@ -44,7 +44,7 @@ void Rechentest(std::string const& strFilename) {
             std::bind(TChatGPT::calculate_addresses, std::ref(vData), std::cref(point)),
             [&vData]() { return std::optional<size_t>(vData.size()); } },
       { "write data to " + strOutput_all, "datasets wrote to file",
-            std::bind(TChatGPT::write_to_File, std::ref(vData), std::cref(strOutput_all), -1),
+            std::bind(TChatGPT::write_addresses_to_file, std::ref(vData), std::cref(strOutput_all), -1),
             [&vData]() { return std::optional<size_t>(vData.size()); } },
       { "delete directory " + strDirectory, "directories deleted",
             std::bind(TChatGPT::delete_directory, std::cref(strDirectory)),
@@ -60,13 +60,13 @@ void Rechentest(std::string const& strFilename) {
             std::bind(TChatGPT::read_addresses_from_directory, std::cref(strDirectory), std::ref(vData)),
             [&vData]() { return std::optional<size_t>(vData.size()); } },
       { "partitioning data to ", "datasets partitioned in vector",
-            [&vData, &value]() { value = TChatGPT::pushMatchingToFront(vData, 1000.0);  },
+            [&vData, &value]() { value = TChatGPT::push_matching_to_front(vData, 1000.0);  },
             [&value]() { return std::optional<size_t>(value); } },
       { "sort partitioned data ", "partitioned datasets sorted",
-            std::bind(TChatGPT::sortAddressesInRange, std::ref(vData), value),
+            std::bind(TChatGPT::sort_addresses_in_range, std::ref(vData), value),
             [&value]() { return std::optional<size_t>(value); } },
       { "write this data to " + strOutput, "datasets wrote to file",
-            std::bind(TChatGPT::write_to_File, std::cref(vData), std::cref(strOutput), value),
+            std::bind(TChatGPT::write_addresses_to_file, std::cref(vData), std::cref(strOutput), value),
             [&value]() { return std::optional<size_t>(value); } }
       };
    ///*
