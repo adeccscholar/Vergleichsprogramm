@@ -84,8 +84,17 @@ increases/decreases in size), sorted in it, and all calculations are performed.
 
 # C++
 
-- Berlin_App - Implementation with Visual C++
+* Berlin_App - Implementation with Visual C++
+* from Stream Evolution of C++ (Mostly Independend)
+  * ChatGPT - created with the help of ChatGPT
+  * Modern C++ - iterative created in the stream with modern C++ 
 
+# Delphi
+
+* Programm_AnsiString \
+initial implementation of the task with national chars and Ansistring  
+* Programm_String \
+adjustment after protest from Embarcadero that the task would not be timely
 
 Copyright 2021 - 2023 adecc Systemhaus GmbH
 Author Volker Hillmann
