@@ -48,7 +48,7 @@ double distance(Location pos1, Location pos2) {
    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
    double d = r * c;
    return d;
-   }
+}
 
 // Funktion zur Berechnung des Kurswinkels von Position 1 zu Position 2
 double bearing(Location pos1, Location pos2) {
@@ -91,15 +91,15 @@ void sortAddressesInRange(data_vector& addresses, int endIndex) {
       }
       else {
          return a1.second.second < a2.second.second; // Sortiere aufsteigend nach Kurswinkel
-         }
+      }
       });
-   }
+}
 
 auto BerechneChatGPT(data_vector& addresses, Location const& point) {
    for (auto& [address, result] : addresses) {
-      double dist = distance( point, { address.Latitude(), address.Longitude() });
+      double dist = distance(point, { address.Latitude(), address.Longitude() });
       result.first = dist;
-      double angle = bearing( { address.Latitude(), address.Longitude() }, point);
+      double angle = bearing({ address.Latitude(), address.Longitude() }, point);
       result.second = fmod(360.0 - angle, 360.0); // Kurswinkel als Komplement des Azimuts
    }
 }
@@ -133,39 +133,39 @@ void writeAddressesToDirectories(const std::string& root_dir, const data_vector&
 
       // write address data to file
       file << address.StreetNumber() << ";" << address.ZipCode() << ";" << address.UrbanUnit_Old() << ";"
-           << std::setprecision(9) << address.Longitude() << ";" << std::setprecision(9) << address.Latitude()
-           << ";" << std::setprecision(3) << result.first << ";" << std::setprecision(3) << result.second
-           << std::endl;
+         << std::setprecision(9) << address.Longitude() << ";" << std::setprecision(9) << address.Latitude()
+         << ";" << std::setprecision(3) << result.first << ";" << std::setprecision(3) << result.second
+         << std::endl;
       file.close();
-      }
    }
+}
 
 
 void write_addresses_to_directory_sorted(const std::string& root_dir, data_vector& addresses)
 {
    // Sort addresses by city, district, district part and street
    std::sort(addresses.begin(), addresses.end(), [](const auto& a, const auto& b) {
-         if (a.first.City() != b.first.City()) {
-            return a.first.City() < b.first.City();
-         }
-         if (a.first.UrbanUnit() != b.first.UrbanUnit()) {
-            return a.first.UrbanUnit() < b.first.UrbanUnit();
-         }
-         if (a.first.District() != b.first.District()) {
-            return a.first.District() < b.first.District();
-         }
-         if (a.first.Street() != b.first.Street()) {
-            return a.first.Street() < b.first.Street();
-         }
-         std::string::size_type szA, szB;
-         int iAN = std::stoi(a.first.StreetNumber(), &szA), iBN = std::stoi(b.first.StreetNumber(), &szB);
-         if(iAN != iBN) {
-            return iAN < iBN;
-            }
-         if(a.first.StreetNumber() != b.first.StreetNumber()) {
-            return a.first.StreetNumber() < b.first.StreetNumber();
-            }
-         return a.first.ZipCode() < b.first.ZipCode();
+      if (a.first.City() != b.first.City()) {
+         return a.first.City() < b.first.City();
+      }
+      if (a.first.UrbanUnit() != b.first.UrbanUnit()) {
+         return a.first.UrbanUnit() < b.first.UrbanUnit();
+      }
+      if (a.first.District() != b.first.District()) {
+         return a.first.District() < b.first.District();
+      }
+      if (a.first.Street() != b.first.Street()) {
+         return a.first.Street() < b.first.Street();
+      }
+      std::string::size_type szA, szB;
+      int iAN = std::stoi(a.first.StreetNumber(), &szA), iBN = std::stoi(b.first.StreetNumber(), &szB);
+      if (iAN != iBN) {
+         return iAN < iBN;
+      }
+      if (a.first.StreetNumber() != b.first.StreetNumber()) {
+         return a.first.StreetNumber() < b.first.StreetNumber();
+      }
+      return a.first.ZipCode() < b.first.ZipCode();
       });
 
    // Iterate over sorted addresses and write to files
@@ -173,7 +173,7 @@ void write_addresses_to_directory_sorted(const std::string& root_dir, data_vecto
    std::string prev_city = "", prev_unit = "", prev_district = "", prev_street = "";
    for (const auto& [address, result] : addresses) {
       // Check if we need to open a new file
-      if (address.City() != prev_city || address.UrbanUnit() != prev_unit || 
+      if (address.City() != prev_city || address.UrbanUnit() != prev_unit ||
          address.District() != prev_district || address.Street() != prev_street) {
          // Close previous file
          if (file.is_open()) {
@@ -202,10 +202,10 @@ void write_addresses_to_directory_sorted(const std::string& root_dir, data_vecto
          << std::endl;
 
       // Update previous values
-      prev_city     = address.City();
-      prev_unit     = address.UrbanUnit();
+      prev_city = address.City();
+      prev_unit = address.UrbanUnit();
       prev_district = address.District();
-      prev_street   = address.Street();
+      prev_street = address.Street();
    }
 
    // Close last file
@@ -216,10 +216,10 @@ void write_addresses_to_directory_sorted(const std::string& root_dir, data_vecto
 
 
 void readAddressesFromDirectory(std::string directoryPath, data_vector& addresses) {
-  // addresses.clear();
-  // addresses.shrink_to_fit();
+   // addresses.clear();
+   // addresses.shrink_to_fit();
 
-   //data_vector addresses;
+    //data_vector addresses;
 
    for (const auto& cityDir : std::filesystem::directory_iterator(directoryPath)) {
       if (!std::filesystem::is_directory(cityDir)) {
@@ -263,10 +263,10 @@ void readAddressesFromDirectory(std::string directoryPath, data_vector& addresse
                      if (count == 1) {
                         address.StreetNumber(data);
                      }
-                     else if(count == 2) {
+                     else if (count == 2) {
                         address.ZipCode(data);
                      }
-                     else if(count == 3) {
+                     else if (count == 3) {
                         address.UrbanUnit_Old(data);
                      }
                      else if (count == 4) {
@@ -286,18 +286,18 @@ void readAddressesFromDirectory(std::string directoryPath, data_vector& addresse
                         std::istringstream(data) >> result.second;
                      }
                   }
-                  addresses.push_back( { address, result } );
+                  addresses.push_back({ address, result });
                }
             }
          }
       }
    }
-  // return addresses;
+   // return addresses;
 }
 
 void SortChatGPT_DIN5007(data_vector& vData) {
    std::sort(vData.begin(), vData.end(), [](auto const& lhs, auto const& rhs) { return lhs.first.CompareDIN5007(rhs.first);  });
-   }
+}
 
 void ReadChatGPT(data_vector& addresses, std::string const& strFilename) {
    addresses.clear();
@@ -305,7 +305,7 @@ void ReadChatGPT(data_vector& addresses, std::string const& strFilename) {
    if (!infile) {
       // geändert in exception anstatt veraltetem Weg über ganzzahlige Rückgabewerte
       throw std::runtime_error("Die Datei konnte nicht geöffnet werden.");
-      }
+   }
    std::string line;
    while (getline(infile, line)) {  // Zeilenweise Daten einlesen
       TData address;
@@ -400,7 +400,7 @@ void WriteChatGPT(data_vector const& addresses, std::string const& strFilename, 
    if (!outfile) {
       // geändert in exception anstatt veraltetem Weg über ganzzahlige Rückgabewerte
       throw std::runtime_error("Die Datei konnte nicht geöffnet werden.");
-      }
+   }
 
    // Adressen in die Ausgabedatei schreiben
    std::locale german(std::locale("de_DE"));
@@ -410,19 +410,19 @@ void WriteChatGPT(data_vector const& addresses, std::string const& strFilename, 
       if (count > 0 && !(i < count)) break;
       std::ostringstream line_stream;
       line_stream.imbue(german);
-      line_stream << address.ZipCode() << " " << address.City() << " / " << address.UrbanUnit() << ", " 
-                  << address.Street() << " " << address.StreetNumber() 
-                  << " -> (" << std::fixed << std::setprecision(9) << address.Latitude()
-                  << ", " << std::fixed << std::setprecision(9) << address.Longitude() << ")"
-                  << " -> " << std::fixed << std::setprecision(3) << distance.first << "m"
-                  << " in " << std::fixed << std::setprecision(1) << distance.second << "°\n";
+      line_stream << address.ZipCode() << " " << address.City() << " / " << address.UrbanUnit() << ", "
+         << address.Street() << " " << address.StreetNumber()
+         << " -> (" << std::fixed << std::setprecision(9) << address.Latitude()
+         << ", " << std::fixed << std::setprecision(9) << address.Longitude() << ")"
+         << " -> " << std::fixed << std::setprecision(3) << distance.first << "m"
+         << " in " << std::fixed << std::setprecision(1) << distance.second << "°\n";
       std::string line = line_stream.str();
       // Zeile in die Datei schreiben
       outfile << line;
       i++;
-      }
-   outfile.close();  // Datei schließen
    }
+   outfile.close();  // Datei schließen
+}
 
 
 
@@ -430,17 +430,17 @@ void Rechentest(std::string const& strFilename) {
    using myTimeType = std::chrono::microseconds; // std::chrono::milliseconds
    static const double time_factor = 1000000.;
    static const int    time_prec = 6;
- 
+
    data_vector vData;
    int value;
    Location point = { 52.520803, 13.40945 };
    std::string strOutput_all = "D:\\Test\\Testausgabe_alle.txt";
-   std::string strOutput     = "D:\\Test\\Testausgabe.txt";
-   std::string strDirectory  = "D:\\Test\\ChatGPT";
+   std::string strOutput = "D:\\Test\\Testausgabe.txt";
+   std::string strDirectory = "D:\\Test\\ChatGPT";
 
-   std::vector<std::tuple<std::string, std::string, std::function<void()>, std::function<std::optional<size_t> ()>>> test_funcs = {
-      { "read file " + strFilename, "datasets readed", 
-            std::bind(ReadChatGPT, std::ref(vData), std::cref(strFilename)), 
+   std::vector<std::tuple<std::string, std::string, std::function<void()>, std::function<std::optional<size_t>()>>> test_funcs = {
+      { "read file " + strFilename, "datasets readed",
+            std::bind(ReadChatGPT, std::ref(vData), std::cref(strFilename)),
             [&vData]() { return std::optional<size_t>(vData.size()); } },
       { "sort data", "datasets sorted",
             std::bind(SortChatGPT_DIN5007, std::ref(vData)),
@@ -455,28 +455,28 @@ void Rechentest(std::string const& strFilename) {
             std::bind(deleteDirectory, std::cref(strDirectory)),
             []() { std::optional<size_t> retval = { };  return retval; } },
       { "write data to directory " + strDirectory, "datasets wrote",
-            //std::bind(write_addresses_to_directory_sorted, std::cref(strDirectory), std::ref(vData)),
-            std::bind(writeAddressesToDirectories, std::cref(strDirectory), std::cref(vData)),
-            [&vData]() { return std::optional<size_t>(vData.size()); } },
-      { "delete data ", "datasets still in alive",
-            [&vData]() { vData.clear(); vData.shrink_to_fit(); },
-            [&vData]() { return std::optional<size_t>(vData.capacity()); } },
-      { "read data from directory " + strDirectory, "datasets read",
-            std::bind(readAddressesFromDirectory, std::cref(strDirectory), std::ref(vData)),
-            [&vData]() { return std::optional<size_t>(vData.size()); } },
-      { "partitioning data to ", "datasets partitioned",
-            [&vData, &value]() { value = pushMatchingToFront(vData, 1000.0);  },
-            [&value]() { return std::optional<size_t>(value); } },
-      { "read data to " + strDirectory, "datasets sorted",
-            std::bind(sortAddressesInRange, std::ref(vData), value),
-            [&value]() { return std::optional<size_t>(value); } },
-      { "write data to " + strOutput, "datasets sorted",
-            std::bind(WriteChatGPT, std::cref(vData), std::cref(strOutput), value),
-            [&value]() { return std::optional<size_t>(value); } }
+      //std::bind(write_addresses_to_directory_sorted, std::cref(strDirectory), std::ref(vData)),
+      std::bind(writeAddressesToDirectories, std::cref(strDirectory), std::cref(vData)),
+      [&vData]() { return std::optional<size_t>(vData.size()); } },
+{ "delete data ", "datasets still in alive",
+      [&vData]() { vData.clear(); vData.shrink_to_fit(); },
+      [&vData]() { return std::optional<size_t>(vData.capacity()); } },
+{ "read data from directory " + strDirectory, "datasets read",
+      std::bind(readAddressesFromDirectory, std::cref(strDirectory), std::ref(vData)),
+      [&vData]() { return std::optional<size_t>(vData.size()); } },
+{ "partitioning data to ", "datasets partitioned",
+      [&vData, &value]() { value = pushMatchingToFront(vData, 1000.0);  },
+      [&value]() { return std::optional<size_t>(value); } },
+{ "read data to " + strDirectory, "datasets sorted",
+      std::bind(sortAddressesInRange, std::ref(vData), value),
+      [&value]() { return std::optional<size_t>(value); } },
+{ "write data to " + strOutput, "datasets sorted",
+      std::bind(WriteChatGPT, std::cref(vData), std::cref(strOutput), value),
+      [&value]() { return std::optional<size_t>(value); } }
    };
    ///*
    myTimeType time_for_all = myTimeType::zero();
-   for(auto const& test_func : test_funcs) {
+   for (auto const& test_func : test_funcs) {
       std::cout << std::left << std::setw(50) << std::get<0>(test_func) << " ... ";
       try {
          auto func_start = std::chrono::high_resolution_clock::now();
@@ -484,15 +484,15 @@ void Rechentest(std::string const& strFilename) {
          auto func_ende = std::chrono::high_resolution_clock::now();
          auto runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
          time_for_all += runtime;
-         if(std::get<3>(test_func)()) { std::cout << std::right << std::setw(10) << *std::get<3>(test_func)() << " "; }
+         if (std::get<3>(test_func)()) { std::cout << std::right << std::setw(10) << *std::get<3>(test_func)() << " "; }
          else { std::cout << "           "; }
          std::cout << std::left << std::setw(25) << std::get<1>(test_func) << " in " << std::right
-                   << std::setw(10) << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
-         }
-      catch(std::exception& ex) {
-         std::cout << "error: " << ex.what() << "\n";
-         }
+            << std::setw(10) << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
       }
+      catch (std::exception& ex) {
+         std::cout << "error: " << ex.what() << "\n";
+      }
+   }
    std::cout << std::endl << std::left << "time for all operations " << std::right
       << std::setw(10) << std::setprecision(time_prec) << time_for_all.count() / time_factor << " sec\n";
    //*/
@@ -583,10 +583,10 @@ int main() {
 
    std::string strInput = "D:\\Test\\berlin_infos.dat";
    Rechentest(strInput);
-   #if defined __BORLANDC__
+#if defined __BORLANDC__
    std::cout << "... press a key ...";
    getchar();
-   #endif
+#endif
    return 0;
 }
 
