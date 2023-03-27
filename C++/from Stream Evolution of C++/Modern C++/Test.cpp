@@ -392,16 +392,6 @@ inline void Sorting(data_vector<double>& vData) {
       return strVal;
    };
 
-   /*
-   static constexpr auto compare_streetnumber2 = [](std::string const& aSNr, std::string const& bSNr) noexcept {
-      std::string::size_type szA, szB;
-      int iAN = stoi(aSNr, &szA), iBN = stoi(bSNr, &szB);
-      if (auto cmp = iAN <=> iBN; cmp != 0) return cmp < 0;
-      return lower(aSNr.substr(szA)) < lower(bSNr.substr(szB)) ? true : false;
-      //return aSNr.substr(szA) < bSNr.substr(szB) ? true : false;
-   };
-   */
-   ///*
    static constexpr auto compare_streetnumber2 = [](std::string const& aSNr, std::string const& bSNr) noexcept {
       int a_Nr, b_Nr;
       auto [a_ptr, a_ec] { std::from_chars(aSNr.data(), aSNr.data() + aSNr.size(), a_Nr) };
@@ -411,7 +401,7 @@ inline void Sorting(data_vector<double>& vData) {
          return lower(a_ptr) < lower(b_ptr);
          }
       };
-   //*/
+
    std::sort(std::execution::par, vData.begin(), vData.end(), [](auto const& lhs, auto const& rhs) {
    //std::sort(vData.begin(), vData.end(), [](auto const& lhs, auto const& rhs) {
       auto const& a = lhs.first;
@@ -427,25 +417,6 @@ inline void Sorting(data_vector<double>& vData) {
 
    }
 
-/*
-384860 datasets read in 1.015935 sec
-384860 datasets sorted in 7.244717 sec
-384860 datasets calculated in 0.041658 sec
-384860 datasets wrote to "D:\Test\Testausgabe_alle.txt" in 1.717351 sec
-1653 datasets partition in 0.002418 sec
-1653 datasets sorted in 0.000411 sec
-1653 datasets wrote to "D:\Test\Testausgabe.txt" in 0.007347 sec
-
-384860 datasets read in 0.171594 sec
-384860 datasets sorted in 0.550478 sec
-384860 datasets calculated in 0.038222 sec
-384860 datasets wrote to "D:\Test\Testausgabe_alle.txt" in 0.828755 sec
-384860 datasets partition in 0.001669 sec
-1653 datasets sorted in 0.000353 sec
-1653 datasets wrote to "D:\Test\Testausgabe.txt" in 0.004153 sec
-
-Finished.
-*/
 
 void Rechentest(std::string const& strFilename) {
    using myTime_Duration = std::chrono::microseconds;
@@ -473,12 +444,6 @@ void Rechentest(std::string const& strFilename) {
 
    func_start = std::chrono::high_resolution_clock::now();
    Location<double> point = { 52.520803, 13.40945 };
-   //Location<double> point = { 52.5208182, 13.4072251 };
-   /*
-   std::for_each(std::execution::par, vData.begin(), vData.end(), [&point](auto& val) mutable {
-      val.second = Calculate<double>(point, val.first);
-      });
-   */
    Calculate(point, vData.begin(), vData.end());
    func_ende = std::chrono::high_resolution_clock::now();
    runtime = std::chrono::duration_cast<myTime_Duration>(func_ende - func_start);
