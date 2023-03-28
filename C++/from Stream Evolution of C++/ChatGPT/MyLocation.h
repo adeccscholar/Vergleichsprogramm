@@ -4,7 +4,7 @@
 #include <iostream>  // ostream
 #include <utility>   // pair
 
-//#define WITH_MOVE
+#define WITH_MOVE
 
 class Result {
    friend std::ostream& operator << (std::ostream& out, Result const& data);

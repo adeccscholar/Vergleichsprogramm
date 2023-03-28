@@ -96,15 +96,26 @@ inline void Write(typename data_vector<ty>::const_iterator begin, typename data_
          << std::setprecision(1) << val.second.second << "°\n";
    */
    
+   /*
    std::for_each(begin, end, [&os](auto const& val) {
       os << val.first.ZipCode() << " " << val.first.City() << " / " << val.first.UrbanUnit() << ", "
-         << val.first.Street() << " " << val.first.StreetNumber() 
+         << val.first.Street() << " " << val.first.StreetNumber()
          << " -> (" << my_Double_to_String_G(val.first.Latitude(), 6) << ", "
-         << my_Double_to_String_G(val.first.Longitude(), 6) << ") -> " 
-         << my_Double_to_String_G(val.second.first, 3) << "m in " 
+         << my_Double_to_String_G(val.first.Longitude(), 6) << ") -> "
+         << my_Double_to_String_G(val.second.first, 3) << "m in "
          << my_Double_to_String_G(val.second.second, 1) << "°\n";
-   
       });
+   */
+   ///*
+   std::string strBuffer;
+   std::for_each(begin, end, [&strBuffer](auto const& val) {
+      auto const& [address, result] = val;
+      std::format_to(std::back_inserter(strBuffer), "{};{};{};{};{};{:.9f};{:.9f};{:.3f};{:.1f}\n",
+         address.ZipCode(), address.City(), address.UrbanUnit(), address.Street(), address.StreetNumber(),
+         address.Latitude(), address.Longitude(), result.first, result.second);
+      });
+   os.write(strBuffer.data(), strBuffer.size());
+   //*/
 }
 
 

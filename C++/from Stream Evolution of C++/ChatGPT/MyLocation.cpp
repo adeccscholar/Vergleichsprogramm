@@ -83,8 +83,9 @@ double Location::distance(Location pos) const {
    double dLat = deg2rad(pos.flLatitude - flLatitude);
    double dLon = deg2rad(pos.flLongitude - flLongitude);
 
-   double a = sin(dLat / 2) * sin(dLat / 2) + cos(lat1) * cos(lat2) * sin(dLon / 2) * sin(dLon / 2);
-   double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+   double a = std::sin(dLat / 2) * std::sin(dLat / 2) + std::cos(lat1) * 
+              std::cos(lat2) * std::sin(dLon / 2) * std::sin(dLon / 2);
+   double c = 2 * std::atan2(std::sqrt(a), std::sqrt(1 - a));
    double d = r * c;
    return d;
 }
@@ -95,13 +96,15 @@ double Location::bearing(Location pos) const {
    double lat2 = deg2rad(pos.flLatitude);
    double dLon = deg2rad(pos.flLongitude - flLongitude);
 
-   double y = sin(dLon) * cos(lat2);
-   double x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
+   double y = std::sin(dLon) * std::cos(lat2);
+   double x = std::cos(lat1) * std::sin(lat2) - std::sin(lat1) * 
+              std::cos(lat2) * std::cos(dLon);
 
-   double bearing = rad2deg(atan2(y, x));
+   double bearing = rad2deg(std::atan2(y, x));
 
    // Korrektur des Winkels auf den Bereich von 0 bis 360 Grad
-   bearing = fmod(bearing + 360.0, 360.0);
+   bearing = std::fmod(bearing + 360.0, 360.0);
 
    return bearing;
 }
+

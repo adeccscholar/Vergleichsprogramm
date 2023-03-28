@@ -48,8 +48,12 @@ void TChatGPT::calculate_addresses(data_vector& addresses, Location const& point
 
 void TChatGPT::delete_directory(const std::string& path) {
    if (std::filesystem::exists(path)) {
+#if defined __GNUC__
+      std::filesystem::remove_all(path);
+#else
       for (const auto& entry : std::filesystem::directory_iterator(path)) {
          if (entry.is_directory()) {
+         //if (fs::is_directory(entry)) {
             delete_directory(entry.path().string());
          }
          else {
@@ -57,6 +61,7 @@ void TChatGPT::delete_directory(const std::string& path) {
          }
       }
       std::filesystem::remove(path);
+#endif
    }
 }
 
@@ -351,13 +356,17 @@ void TChatGPT::write_addresses_to_file(data_vector const& addresses, std::string
    }
 
    // Adressen in die Ausgabedatei schreiben
+#if !defined __GNUC__
    std::locale german(std::locale("de_DE"));
+#endif
    int i = 0;
    for (const auto& [address, distance] : addresses) {
       // Zeile im gewünschten Format zusammenstellen
       if (count > 0 && !(i < count)) break;
       std::ostringstream line_stream;
+#if !defined __GNUC__
       line_stream.imbue(german);
+#endif
       line_stream << address.ZipCode() << " " << address.City() << " / " << address.UrbanUnit() << ", "
          << address.Street() << " " << address.StreetNumber()
          << " -> (" << std::fixed << std::setprecision(9) << address.Latitude()

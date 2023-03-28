@@ -18,7 +18,7 @@
 #include <chrono>
 #include <optional>
 
-
+using namespace std::string_literals;
 
 void Rechentest(std::string const& strFilename) {
    using myTimeType = std::chrono::microseconds; // std::chrono::milliseconds
@@ -26,48 +26,64 @@ void Rechentest(std::string const& strFilename) {
    static const int    time_prec = 6;
 
    data_vector vData;
-   int value;
+   int value = 0;
    Location    point         = { 52.520803, 13.40945 };
-   std::string strOutput_all = "D:\\Test\\Testausgabe_alle.txt";
-   std::string strOutput     = "D:\\Test\\Testausgabe.txt";
-   std::string strDirectory  = "D:\\Test\\ChatGPT";
+   std::string strOutput_all = "D:\\Test\\Testausgabe_alle.txt"s;
+   std::string strOutput     = "D:\\Test\\Testausgabe.txt"s;
+   std::string strDirectory  = "D:\\Test\\ChatGPT"s;
 
-   std::vector<std::tuple<std::string, std::string, std::function<void()>, std::function<std::optional<size_t>()>>> test_funcs = {
-      { "read file " + strFilename, "datasets read from file",
+   using call_func = std::function<void()>; 
+   using mySizeRet = std::optional<size_t>;
+   using size_func = std::function<mySizeRet()>;
+   static size_func addresses_size = [&vData]() -> mySizeRet {
+      return std::make_optional<size_t>( vData.size() ); 
+      };
+
+   static size_func addresses_capacity = [&vData]() -> mySizeRet {
+      return std::make_optional<size_t>(vData.capacity());
+      };
+
+   static size_func value_size = [&value]() -> mySizeRet {
+      return std::make_optional<size_t>(value);
+      };
+
+   std::vector<std::tuple<std::string, std::string, call_func, size_func>> test_funcs = {
+      { "read file "s + strFilename, "datasets read from file"s,
             std::bind(TChatGPT::read_addresses_from_file, std::ref(vData), std::cref(strFilename)),
-            [&vData]() { return std::optional<size_t>(vData.size()); } },
-      { "calculate data", "datasets calculated for point",
+            addresses_size },
+      { "calculate data"s, "datasets calculated for point"s,
             std::bind(TChatGPT::calculate_addresses, std::ref(vData), std::cref(point)),
-            [&vData]() { return std::optional<size_t>(vData.size()); } },
-      { "sort data", "datasets sorted in vector",
+            addresses_size },
+      { "sort data"s, "datasets sorted in vector"s,
             //std::bind(TChatGPT::sort_DIN5007, std::ref(vData)),
             std::bind(TChatGPT::sort_DIN5007_Var2, std::ref(vData)),
-            [&vData]() { return std::optional<size_t>(vData.size()); } },
-      { "write data to " + strOutput_all, "datasets wrote to file",
+            addresses_size },
+      { "write data to "s + strOutput_all, "datasets wrote to file"s,
             std::bind(TChatGPT::write_addresses_to_file, std::ref(vData), std::cref(strOutput_all), -1),
-            [&vData]() { return std::optional<size_t>(vData.size()); } },
-      { "delete directory " + strDirectory, "directories deleted",
+            addresses_size },
+      { "delete directory "s + strDirectory, "directories deleted"s,
             std::bind(TChatGPT::delete_directory, std::cref(strDirectory)),
             []() { std::optional<size_t> retval = { };  return retval; } },
-      { "write data to directory " + strDirectory, "datasets wrote to directory",
+      { "write data to directory "s + strDirectory, "datasets wrote to directory"s,
             //std::bind(TChatGPT::write_addresses_to_directories, std::cref(strDirectory), std::cref(vData)),
             std::bind(TChatGPT::write_addresses_to_directory_sorted, std::cref(strDirectory), std::ref(vData)),
-            [&vData]() { return std::optional<size_t>(vData.size()); } },
-      { "delete data ", "datasets still in alive",
+            addresses_size },
+      { "delete data "s, "datasets still in alive"s,
             [&vData]() { vData.clear(); vData.shrink_to_fit(); },
-            [&vData]() { return std::optional<size_t>(vData.capacity()); } },
-      { "read data from directory " + strDirectory, "datasets read from file",
+            addresses_capacity },
+      { "read data from directory "s + strDirectory, "datasets read from file"s,
             std::bind(TChatGPT::read_addresses_from_directory, std::cref(strDirectory), std::ref(vData)),
-            [&vData]() { return std::optional<size_t>(vData.size()); } },
-      { "partitioning data to ", "datasets partitioned in vector",
+            addresses_size },
+      { "partitioning data to "s, "datasets partitioned in vector"s,
             [&vData, &value]() { value = TChatGPT::push_matching_to_front(vData, 1000.0);  },
-            [&value]() { return std::optional<size_t>(value); } },
-      { "sort partitioned data ", "partitioned datasets sorted",
+            value_size },
+      { "sort partitioned data "s, "partitioned datasets sorted"s,
             std::bind(TChatGPT::sort_addresses_in_range, std::ref(vData), value),
-            [&value]() { return std::optional<size_t>(value); } },
-      { "write this data to " + strOutput, "datasets wrote to file",
+            value_size },
+      { "write this data to "s + strOutput, "datasets wrote to file"s,
             std::bind(TChatGPT::write_addresses_to_file, std::cref(vData), std::cref(strOutput), value),
-            [&value]() { return std::optional<size_t>(value); } }
+            value_size }
+
       };
    ///*
    myTimeType time_for_all = myTimeType::zero();
@@ -174,11 +190,12 @@ void Rechentest(std::string const& strFilename) {
 int main() {
    std::cout.setf(std::ios::showpoint);
    std::cout.setf(std::ios::fixed);
+#if !defined __GNUC__
    std::cout.imbue(std::locale("de_DE"));
-
+#endif
    std::string strInput = "D:\\Test\\berlin_infos.dat";
    Rechentest(strInput);
-#if defined __BORLANDC__
+#if defined __BORLANDC__ || defined __GNUC__
    std::cout << "... press a key ...";
    getchar();
 #endif

@@ -359,8 +359,8 @@ void Test(std::string const& strFilename) {
 
 inline void Sorting(data_vector<double>& vData) {
 
-   static const std::string special_chars = "äöüßÄÖÜáèéçñ"s;
-   static const std::map<char, std::string> special_values = { {'ä',"ae"s}, {'Ä',"Ae"s },{'ü',"ue"s},{'Ü',"Ue"s},{'ß',"ss"s},
+   static constexpr const std::string special_chars = "äöüßÄÖÜáèéçñ"s;
+   static const std::map<unsigned char, std::string> special_values = { {'ä',"ae"s}, {'Ä',"Ae"s },{'ü',"ue"s},{'Ü',"Ue"s},{'ß',"ss"s},
                                                                {'ö',"oe"s}, {'Ö',"Oe"s },{'á',"a"s },{'è',"e"s },{'é',"e"s },{'ç',"c"s },{'ñ',"n"s } };
 
    static constexpr auto normalize = [](std::string const& param, size_t pos) noexcept {
@@ -418,6 +418,83 @@ inline void Sorting(data_vector<double>& vData) {
    }
 
 
+inline void WriteToDirectory(std::string const& strPath, data_vector<double>& vData) {
+   static constexpr auto lower = [](std::string&& strVal) {
+      std::transform(std::execution::par, strVal.begin(), strVal.end(), strVal.begin(), [](char val) { return std::tolower(val); });
+      return strVal;
+   };
+
+   static constexpr auto compare_streetnumber2 = [](std::string const& aSNr, std::string const& bSNr) noexcept {
+      int a_Nr, b_Nr;
+      auto [a_ptr, a_ec] { std::from_chars(aSNr.data(), aSNr.data() + aSNr.size(), a_Nr) };
+      auto [b_ptr, b_ec] { std::from_chars(bSNr.data(), bSNr.data() + bSNr.size(), b_Nr) };
+      if (auto cmp = a_Nr <=> b_Nr; cmp != 0) return cmp < 0;
+      else {
+         return lower(a_ptr) < lower(b_ptr);
+      }
+   };
+
+   static constexpr auto compare = [](auto const& a, auto const& b) noexcept {
+     // if (auto cmp = std::tie(a.first.City(), a.first.UrbanUnit(), a.first.District(), a.first.Street()) <=>
+     //                std::tie(b.first.City(), b.first.UrbanUnit(), b.first.District(), b.first.Street()); cmp != 0) return cmp < 0;
+      if (auto cmp = a.first.City() <=> b.first.City(); cmp != 0) return cmp < 0;
+      if (auto cmp = a.first.UrbanUnit() <=> b.first.UrbanUnit(); cmp != 0) return cmp < 0;
+      if (auto cmp = a.first.District() <=> b.first.District(); cmp != 0) return cmp < 0;
+      if (auto cmp = a.first.Street() <=> b.first.Street(); cmp != 0) return cmp < 0;
+      return compare_streetnumber2(a.first.StreetNumber(), b.first.StreetNumber());
+      };
+
+   std::sort(std::execution::par, vData.begin(), vData.end(), compare);
+
+   using tplParts = std::tuple<data_vector<double>::const_iterator, data_vector<double>::const_iterator, std::ostringstream>;
+   using myIterPair = std::tuple<data_vector<double>::const_iterator, data_vector<double>::const_iterator, fs::path>;
+   std::vector<myIterPair> positions;
+   fs::path myOldPath = ""s;
+   for(auto first = vData.begin(); first != vData.end();) {
+      auto const& [address, result] = *first;
+      fs::path myPath = fs::path(strPath) / address.City() / address.UrbanUnit() / address.District();
+      if(myPath != myOldPath) {
+         fs::create_directories(myPath);
+         myOldPath = myPath;
+         }
+      auto last = std::find_if(std::execution::par, first, vData.end(), [&first](auto const& val) {
+         return first->first.Street() != val.first.Street() ? true : 
+            (first->first.District() != val.first.District() ? true : 
+               (first->first.UrbanUnit() != val.first.UrbanUnit() ? true : 
+                  (first->first.City() != val.first.City() ? true : false)));
+         });
+      positions.emplace_back(first, last, myPath / (first->first.Street() + ".csv"s));
+      first = last;
+      }
+
+   std::for_each(std::execution::par, positions.cbegin(), positions.cend(), [](auto const& val) {
+      std::string strBuffer;
+      std::for_each(std::get<0>(val), std::get<1>(val), [&strBuffer](auto const& value) {
+         auto const& [address, result] = value;
+         /*
+         ofs << address.StreetNumber() << ";" << address.ZipCode() << ";" << address.UrbanUnit_Old() << ";"
+            << my_Double_to_String(address.Latitude(), 9) << ";" << my_Double_to_String(address.Longitude(), 9) << ";"
+            << my_Double_to_String(result.first, 3) << ";" << my_Double_to_String(result.second, 1) << std::endl;
+         */
+         /*
+         std::format_to(std::back_inserter(strBuffer), "{};{};{};{};{};{};{}\n",
+                            address.StreetNumber(), address.ZipCode(), address.UrbanUnit_Old(),
+                            my_Double_to_String(address.Latitude(), 9), my_Double_to_String(address.Longitude(), 9),
+                            my_Double_to_String(result.first, 3), my_Double_to_String(result.second, 1));
+         */
+         std::format_to(std::back_inserter(strBuffer), "{};{};{};{:.9f};{:.9f};{:.3f};{:.1f}\n",
+                        address.StreetNumber(), address.ZipCode(), address.UrbanUnit_Old(), address.Latitude(), address.Longitude(),
+                        result.first, result.second);
+         });
+      std::ofstream(std::get<2>(val)).write(strBuffer.data(), strBuffer.size());
+      });
+
+}
+
+
+
+
+
 void Rechentest(std::string const& strFilename) {
    using myTime_Duration = std::chrono::microseconds;
    static const double time_factor = 1000000.;
@@ -449,7 +526,6 @@ void Rechentest(std::string const& strFilename) {
    runtime = std::chrono::duration_cast<myTime_Duration>(func_ende - func_start);
    std::cout << vData.size() << " datasets calculated in "
       << std::setprecision(time_precision) << runtime.count() / time_factor << " sec\n";
-
    std::string strOutput = "D:\\Test\\Testausgabe_alle.txt"s;
    std::ostringstream os;
    func_start = std::chrono::high_resolution_clock::now();
@@ -463,9 +539,18 @@ void Rechentest(std::string const& strFilename) {
 
 
    strOutput = "D:\\Test\\Testausgabe.txt"s;
-   std::cout << "\n Write file \"" << strOutput << "\"...\n";
 
    func_start = std::chrono::high_resolution_clock::now();
+   WriteToDirectory("D:\\Test\\Wir", vData);
+   func_ende = std::chrono::high_resolution_clock::now();
+   runtime = std::chrono::duration_cast<myTime_Duration>(func_ende - func_start);
+   std::cout << vData.size() << " datasets wrote to directies "
+      << std::setprecision(time_precision) << runtime.count() / time_factor << " sec\n";
+
+
+
+
+  func_start = std::chrono::high_resolution_clock::now();
    auto it = std::partition(std::execution::par, vData.begin(), vData.end(), [](auto const& val) {
       return val.second.first < 1000.0;
       });
@@ -476,7 +561,7 @@ void Rechentest(std::string const& strFilename) {
 
    func_start = std::chrono::high_resolution_clock::now();
    std::sort(std::execution::par, vData.begin(), it, [](auto const& lhs, auto const& rhs) {
-      if (auto cmp = lhs.second.first <=> rhs.second.first; cmp != 0) return cmp > 0;
+      if (lhs.second.first != rhs.second.first) return lhs.second.first > rhs.second.first;
       else return lhs.second.second < rhs.second.second;
       });
    func_ende = std::chrono::high_resolution_clock::now();
@@ -509,17 +594,11 @@ int main() {
    std::cout.setf(std::ios::showpoint);
    std::cout.setf(std::ios::fixed);
 
-   //TData<double> data;
-   //Location<double> point  = { 2.0, 1.0 };
-   //Calculate<double>(data, point);
- 
-   //Location<double> point = { 2.0, 1.0 };
-   //Location<int> point1 = { 2, 1 };
-
-   
    std::string strInput = "D:\\Test\\berlin_infos.dat"s;
-   //std::thread t(Test, std::cref(strInput));
+
+   //std::thread t(Rechentest, std::cref(strInput));
    //t.join();
+
    Rechentest(strInput);
    #if defined __BORLANDC__
    std::cout << "... press a key ...";

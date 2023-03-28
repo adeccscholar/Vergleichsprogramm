@@ -4,7 +4,7 @@
 #include <string_view>
 #include <functional>
 
-//#define WITH_MOVE
+#define WITH_MOVE
 
 /**
  * @brief Address or cadastral data
