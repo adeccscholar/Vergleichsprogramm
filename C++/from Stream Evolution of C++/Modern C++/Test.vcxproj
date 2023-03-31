@@ -139,6 +139,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Test.cpp" />
+    <ClCompile Include="Test_Read.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyAddress.h" />

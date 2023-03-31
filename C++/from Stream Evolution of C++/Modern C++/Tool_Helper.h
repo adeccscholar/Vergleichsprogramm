@@ -4,6 +4,13 @@
 #include <string>
 #include <chrono>
 #include <vector>
+#include <locale>
+
+struct TMyNum : public std::numpunct<char> {
+   char_type   do_decimal_point() const { return ','; }
+   char_type   do_thousands_sep() const { return '.'; }
+   std::string do_grouping()      const { return "\3"; }
+};
 
 /**
  * @brief method to call a function and measure the used time
@@ -58,6 +65,15 @@ inline std::string my_Double_to_String(ty const& value) {
    std::array<char, 20> target;
    auto [ptrValue, ec] = std::to_chars(target.data(), target.data() + target.size(), value);
    return std::string(target.data(), ptrValue);
+}
+
+template <typename ty>
+   requires std::floating_point<ty>
+inline std::string my_Double_to_String_short(ty const& value, int iPrecision) {
+   std::string target{ "0000000000000000" };
+   std::to_chars(target.data(), target.data() + target.size(), value, std::chars_format::fixed, iPrecision);
+   //target.resize(target.find_last_not_of("0") + 1);
+   return target.erase(target.find_last_not_of("0") + 1);
 }
 
 //template <typename ty>

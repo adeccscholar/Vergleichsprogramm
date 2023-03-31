@@ -50,18 +50,8 @@ class TData {
       return out;
 	}
 
-	friend void swap(TData &a, TData &b) {
-		std::swap(a.strCity,         b.strCity);
-		std::swap(a.strStreet,       b.strStreet);
-		std::swap(a.strStreetNumber, b.strStreetNumber);
-		std::swap(a.strZipCode,      b.strZipCode);
-		std::swap(a.strUrban_Unit,   b.strUrban_Unit);
-		std::swap(a.strOld_Unit,     b.strOld_Unit);
-		std::swap(a.strDistrict,     b.strDistrict);
-		std::swap(a.flLatitude,      b.flLatitude);
-		std::swap(a.flLongitude,     b.flLongitude);
-		std::swap(a.flDistance,      b.flDistance);
-		std::swap(a.flAngle,         b.flAngle);
+	friend void swap(TData& a, TData& b) {
+		a.swap(b);
 	   }
 
    private:
@@ -85,35 +75,24 @@ class TData {
 		 }
 
 	  TData(TData && ref) noexcept {
-		  /*
-		  std::exchange(strCity, ref.strCity);
-		  std::exchange(strStreet, ref.strStreet);
-		  std::exchange(strStreetNumber, ref.strStreetNumber);
-		  std::exchange(strZipCode, ref.strZipCode);
-		  std::exchange(strUrban_Unit, ref.strUrban_Unit);
-		  std::exchange(strOld_Unit, ref.strOld_Unit);
-		  std::exchange(strDistrict, ref.strDistrict);
-		  std::exchange(flLatitude, ref.flLatitude);
-		  std::exchange(flLongitude, ref.flLongitude);
-		  std::exchange(flDistance, ref.flDistance);
-		  std::exchange(flAngle, ref.flAngle);
-		  */
-		  ///*
-		  std::swap(strCity,         ref.strCity);
-		  std::swap(strStreet,       ref.strStreet);
-		  std::swap(strStreetNumber, ref.strStreetNumber);
-		  std::swap(strZipCode,      ref.strZipCode);
-		  std::swap(strUrban_Unit,   ref.strUrban_Unit);
-		  std::swap(strOld_Unit,     ref.strOld_Unit);
-		  std::swap(strDistrict,     ref.strDistrict);
-		  std::swap(flLatitude,      ref.flLatitude);
-		  std::swap(flLongitude,     ref.flLongitude);
-		  std::swap(flDistance,      ref.flDistance);
-		  std::swap(flAngle,         ref.flAngle);
-		  //*/
+		  swap(ref);
 		  }
 
 	  virtual ~TData(void) { }
+
+	  void swap(TData& ref) noexcept {
+		  std::swap(strCity, ref.strCity);
+		  std::swap(strStreet, ref.strStreet);
+		  std::swap(strStreetNumber, ref.strStreetNumber);
+		  std::swap(strZipCode, ref.strZipCode);
+		  std::swap(strUrban_Unit, ref.strUrban_Unit);
+		  std::swap(strOld_Unit, ref.strOld_Unit);
+		  std::swap(strDistrict, ref.strDistrict);
+		  std::swap(flLatitude, ref.flLatitude);
+		  std::swap(flLongitude, ref.flLongitude);
+		  std::swap(flDistance, ref.flDistance);
+		  std::swap(flAngle, ref.flAngle);
+	     }
 
 	  TData& operator = (TData const& ref) noexcept {
 		 _copy(ref);
@@ -121,33 +100,8 @@ class TData {
 		 }
 
 	  TData& operator = (TData && ref) noexcept {
-		  /*
-		  std::exchange(strCity, ref.strCity);
-		  std::exchange(strStreet, ref.strStreet);
-		  std::exchange(strStreetNumber, ref.strStreetNumber);
-		  std::exchange(strZipCode, ref.strZipCode);
-		  std::exchange(strUrban_Unit, ref.strUrban_Unit);
-		  std::exchange(strOld_Unit, ref.strOld_Unit);
-		  std::exchange(strDistrict, ref.strDistrict);
-		  std::exchange(flLatitude, ref.flLatitude);
-		  std::exchange(flLongitude, ref.flLongitude);
-		  std::exchange(flDistance, ref.flDistance);
-		  std::exchange(flAngle, ref.flAngle);
-		  */
-		  ///*
-		  std::swap(strCity,         ref.strCity);
-		  std::swap(strStreet,       ref.strStreet);
-		  std::swap(strStreetNumber, ref.strStreetNumber);
-		  std::swap(strZipCode,      ref.strZipCode);
-		  std::swap(strUrban_Unit,   ref.strUrban_Unit);
-		  std::swap(strOld_Unit,     ref.strOld_Unit);
-		  std::swap(strDistrict,     ref.strDistrict);
-		  std::swap(flLatitude,      ref.flLatitude);
-		  std::swap(flLongitude,     ref.flLongitude);
-		  std::swap(flDistance,      ref.flDistance);
-		  std::swap(flAngle,         ref.flAngle);
-		  //*/
-		 return *this;
+		  swap(ref);
+		  return *this;
 		 }
 
 	  TData& operator = (pairLocation val) {

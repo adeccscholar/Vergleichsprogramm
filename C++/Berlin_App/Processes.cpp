@@ -324,7 +324,6 @@ void Clean_Directory(string const& strPath) {
    }
 
 
-//#define MY_DEBUG
 void WriteTo_Directory_fast(string const& strPath, size_t iMaxCount, size_t iBorder, myData& vec_data) {
    using tplParts = std::tuple<citData, citData, std::ostringstream>;
    using myIterPair = tuple<myData::const_iterator, myData::const_iterator, fs::path, std::vector<tplParts>>;
@@ -345,17 +344,8 @@ void WriteTo_Directory_fast(string const& strPath, size_t iMaxCount, size_t iBor
       };
 
    // nicht zwangsläufig sortiert, also vorher sortieren !!!!   
-   #if defined MY_DEBUG
-   auto func_start = chrono::high_resolution_clock::now();
-   #endif
    std::sort(execution::par, vec_data.begin(), vec_data.end(), compare );
-   #if defined MY_DEBUG
-   auto func_ende = chrono::high_resolution_clock::now();
-   auto time = chrono::duration_cast<chrono::microseconds>(func_ende - func_start).count();
-   cout << endl << "   --> sorting " << setprecision(3) << time / 1000.0 << endl;
- 
-   func_start = chrono::high_resolution_clock::now();
-   #endif
+
    vector<myIterPair> positions;
    fs::path myOldPath = "";
    for (auto first = vec_data.cbegin(); first != vec_data.cend(); ) {
@@ -374,13 +364,6 @@ void WriteTo_Directory_fast(string const& strPath, size_t iMaxCount, size_t iBor
       first = last;
    }
 
-   #if defined MY_DEBUG
-   func_ende = chrono::high_resolution_clock::now();
-   time = chrono::duration_cast<chrono::microseconds>(func_ende - func_start).count();
-   cout << "   --> preparing " << setprecision(3) << time / 1000.0 << endl;
-
-   func_start = chrono::high_resolution_clock::now();
-   #endif
    std::for_each(execution::par, positions.begin(), positions.end(), [&iMaxCount, &iBorder](myIterPair& val) {
       if(auto size = (size_t)std::distance(get<0>(val), get<1>(val)); size > iBorder) {
          size_t iSteps = size / iMaxCount;
@@ -421,11 +404,6 @@ void WriteTo_Directory_fast(string const& strPath, size_t iMaxCount, size_t iBor
             });
          }
       });
-   #if defined MY_DEBUG
-   func_ende = chrono::high_resolution_clock::now();
-   time = chrono::duration_cast<chrono::microseconds>(func_ende - func_start).count();
-   cout << "   --> writing " << setprecision(3) << time / 1000.0 << endl;
-   #endif
 }
 
 void WriteTo_Directory(string const& strPath, size_t iMaxCount, size_t iBorder, myData& vec_data) {
@@ -447,17 +425,8 @@ void WriteTo_Directory(string const& strPath, size_t iMaxCount, size_t iBorder, 
    };
 
    // nicht zwangsläufig sortiert, also vorher sortieren !!!!   
-#if defined MY_DEBUG
-   auto func_start = chrono::high_resolution_clock::now();
-#endif
    std::sort(execution::par, vec_data.begin(), vec_data.end(), compare);
-#if defined MY_DEBUG
-   auto func_ende = chrono::high_resolution_clock::now();
-   auto time = chrono::duration_cast<chrono::microseconds>(func_ende - func_start).count();
-   cout << endl << "   --> sorting " << setprecision(3) << time / 1000.0 << endl;
 
-   func_start = chrono::high_resolution_clock::now();
-#endif
    using myIterPair = tuple<myData::const_iterator, myData::const_iterator, fs::path>;
    vector<myIterPair> positions;
    fs::path myOldPath = "";
@@ -477,33 +446,20 @@ void WriteTo_Directory(string const& strPath, size_t iMaxCount, size_t iBorder, 
       first = last;
    }
 
-#if defined MY_DEBUG
-   func_ende = chrono::high_resolution_clock::now();
-   time = chrono::duration_cast<chrono::microseconds>(func_ende - func_start).count();
-   cout << "   --> preparing " << setprecision(3) << time / 1000.0 << endl;
-
-   func_start = chrono::high_resolution_clock::now();
-#endif
-
-   std::for_each(execution::par, positions.cbegin(), positions.cend(), [](myIterPair const& val)  {
+   std::for_each(std::execution::par, positions.cbegin(), positions.cend(), [](myIterPair const& val)  {
          ofstream ofs(get<2>(val)); //, std::ios::binary);
          std::vector<char> buffer(iBufferPages3 * 4'096);
          ofs.rdbuf()->pubsetbuf(buffer.data(), buffer.size());
          std::for_each(get<0>(val), get<1>(val), [&ofs](auto const& value) {
             ofs << value.StreetNumber() << ";" << value.ZipCode() << ";" << value.Old_Unit() << ";"
-                << my_Double_to_String(value.Latitude()) << ";"
-                << my_Double_to_String(value.Longitude()) << ";"
-                << my_Double_to_String(value.Distance()) << ";"
-                << my_Double_to_String(value.Angle()) 
-                << endl;
+                << my_Double_to_String_short(value.Latitude(), 9) << ";"
+                << my_Double_to_String_short(value.Longitude(), 9) << ";"
+                << my_Double_to_String_short(value.Distance(), 3) << ";"
+                << my_Double_to_String_short(value.Angle(), 3)
+                << std::endl;
             
             });
          });
-#if defined MY_DEBUG
-   func_ende = chrono::high_resolution_clock::now();
-   time = chrono::duration_cast<chrono::microseconds>(func_ende - func_start).count();
-   cout << "   --> writing " << setprecision(3) << time / 1000.0 << endl;
-#endif
 }
 
 

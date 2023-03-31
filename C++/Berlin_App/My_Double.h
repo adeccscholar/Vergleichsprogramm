@@ -19,6 +19,13 @@ inline std::string my_Double_to_String(double const& value, int iPrecision) {
 	return std::string(target.data(), ptrValue);
 }
 
+inline std::string my_Double_to_String_short(double const& value, int iPrecision) {
+	std::string target{ "000000000000000000" };;
+	std::to_chars(target.data(), target.data() + target.size(), value, std::chars_format::fixed, iPrecision);
+	target.resize(target.find_last_not_of("0") + 1);
+	return target;
+}
+
 
 inline std::string my_Double_to_String_G(double const& value, int iPrecision) {
 	std::array<char, 20> target;

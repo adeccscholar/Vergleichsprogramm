@@ -25,7 +25,7 @@ int TChatGPT::push_matching_to_front(data_vector& addresses, double matchValue) 
    return i; // (v[i] == matchValue) ? i + 1 : i;
 }
 
-void TChatGPT::sort_addresses_in_range(data_vector& addresses, int endIndex) {
+void TChatGPT::sort_addresses_in_range(data_vector& addresses, int const& endIndex) {
    sort(addresses.begin(), addresses.begin() + endIndex, [](const auto& a1, const auto& a2) {
       if (a1.second.Distance() != a2.second.Distance()) {
          return a1.second.Distance() > a2.second.Distance(); // Sortiere absteigend nach Entfernung
@@ -45,6 +45,21 @@ void TChatGPT::calculate_addresses(data_vector& addresses, Location const& point
       result.Angle(angle);
    }
 }
+
+void TChatGPT::write_addresses_to_file(data_vector& addresses, std::string const& strFile) {
+   static std::locale loc(std::locale("de_DE"), new TMyNum);
+   std::ofstream of(strFile);
+   of.imbue(loc);
+   for (auto& [address, result] : addresses) {
+      of << std::left << std::setw(5) << address.ZipCode() << " "
+         << std::setw(75) << (address.City() + " - " + address.District())
+         << std::setw(65) << (address.Street() + " " + address.StreetNumber()) << "="
+         << std::fixed << std::setprecision(3) << result.Distance() << "m / "
+         << std::fixed << std::setprecision(3) << result.Angle() << "°"
+         << std::endl;
+      }
+   of.close();
+   }
 
 void TChatGPT::delete_directory(const std::string& path) {
    if (std::filesystem::exists(path)) {
@@ -347,7 +362,7 @@ void TChatGPT::read_addresses_from_file(data_vector& addresses, std::string cons
 }
 
 
-void TChatGPT::write_addresses_to_file(data_vector const& addresses, std::string const& strFilename, int count) {
+void TChatGPT::write_part_addresses_to_file(data_vector const& addresses, std::string const& strFilename, int const& count) {
    // Datei für die Ausgabe öffnen
    std::ofstream outfile(strFilename);
    if (!outfile) {
@@ -357,26 +372,26 @@ void TChatGPT::write_addresses_to_file(data_vector const& addresses, std::string
 
    // Adressen in die Ausgabedatei schreiben
 #if !defined __GNUC__
-   std::locale german(std::locale("de_DE"));
+   std::locale german(std::locale("de_DE"), new TMyNum());
 #endif
    int i = 0;
    for (const auto& [address, distance] : addresses) {
       // Zeile im gewünschten Format zusammenstellen
-      if (count > 0 && !(i < count)) break;
+      if (i++ >= count) break;
       std::ostringstream line_stream;
 #if !defined __GNUC__
       line_stream.imbue(german);
 #endif
-      line_stream << address.ZipCode() << " " << address.City() << " / " << address.UrbanUnit() << ", "
-         << address.Street() << " " << address.StreetNumber()
-         << " -> (" << std::fixed << std::setprecision(9) << address.Latitude()
-         << ", " << std::fixed << std::setprecision(9) << address.Longitude() << ")"
-         << " -> " << std::fixed << std::setprecision(3) << distance.Distance() << "m"
-         << " in " << std::fixed << std::setprecision(1) << distance.Angle() << "°\n";
+      line_stream << std::left << std::setw(5) << address.ZipCode() << " "
+         << std::setw(75) << (address.City() + " - " + address.District())
+         << std::setw(65) << (address.Street() + " " + address.StreetNumber()) << "="
+         << std::fixed << std::setprecision(3) << distance.Distance() << "m / "
+         << std::fixed << std::setprecision(3) << distance.Angle() << "°"
+         << std::endl;
+  
       std::string line = line_stream.str();
       // Zeile in die Datei schreiben
       outfile << line;
-      i++;
    }
    outfile.close();  // Datei schließen
 }

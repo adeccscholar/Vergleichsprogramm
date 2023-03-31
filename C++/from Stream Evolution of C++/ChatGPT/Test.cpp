@@ -59,7 +59,7 @@ void Rechentest(std::string const& strFilename) {
             std::bind(TChatGPT::sort_DIN5007_Var2, std::ref(vData)),
             addresses_size },
       { "write data to "s + strOutput_all, "datasets wrote to file"s,
-            std::bind(TChatGPT::write_addresses_to_file, std::ref(vData), std::cref(strOutput_all), -1),
+            std::bind(TChatGPT::write_addresses_to_file, std::ref(vData), std::cref(strOutput_all)),
             addresses_size },
       { "delete directory "s + strDirectory, "directories deleted"s,
             std::bind(TChatGPT::delete_directory, std::cref(strDirectory)),
@@ -78,14 +78,14 @@ void Rechentest(std::string const& strFilename) {
             [&vData, &value]() { value = TChatGPT::push_matching_to_front(vData, 1000.0);  },
             value_size },
       { "sort partitioned data "s, "partitioned datasets sorted"s,
-            std::bind(TChatGPT::sort_addresses_in_range, std::ref(vData), value),
+            std::bind(TChatGPT::sort_addresses_in_range, std::ref(vData), std::cref(value)),
             value_size },
       { "write this data to "s + strOutput, "datasets wrote to file"s,
-            std::bind(TChatGPT::write_addresses_to_file, std::cref(vData), std::cref(strOutput), value),
+            std::bind(TChatGPT::write_part_addresses_to_file, std::cref(vData), std::cref(strOutput), std::cref(value)),
             value_size }
 
       };
-   ///*
+
    myTimeType time_for_all = myTimeType::zero();
    for (auto const& test_func : test_funcs) {
       std::cout << std::left << std::setw(48) << std::get<0>(test_func) << " ... ";
@@ -106,83 +106,6 @@ void Rechentest(std::string const& strFilename) {
    }
    std::cout << std::endl << std::left << "time for all operations " << std::right
       << std::setw(10) << std::setprecision(time_prec) << time_for_all.count() / time_factor << " sec\n";
-   //*/
-/*
-   auto func_start = std::chrono::high_resolution_clock::now();
-   ReadChatGPT(vData, strFilename);
-   auto func_ende = std::chrono::high_resolution_clock::now();
-   auto runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
-   std::cout << vData.size() << " datasets read in "
-      << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
-
-
-   func_start = std::chrono::high_resolution_clock::now();
-   SortChatGPT_DIN5007(vData);
-   func_ende = std::chrono::high_resolution_clock::now();
-   runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
-   std::cout << vData.size() << " datasets sorted in "
-      << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
-
-   func_start = std::chrono::high_resolution_clock::now();
-   BerechneChatGPT(vData, point);
-   func_ende = std::chrono::high_resolution_clock::now();
-   runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
-   std::cout << vData.size() << " datasets calculated in "
-      << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
-
-   func_start = std::chrono::high_resolution_clock::now();
-   WriteChatGPT(vData, strOutput_all);
-   func_ende = std::chrono::high_resolution_clock::now();
-   runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
-   std::cout << vData.size() << " datasets wrote to \"" << strOutput_all << "\" in "
-      << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
-
-   func_start = std::chrono::high_resolution_clock::now();
-   deleteDirectory(strDirectory);
-   func_ende = std::chrono::high_resolution_clock::now();
-   runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
-   std::cout << vData.size() << " deleted Directories \"" << strDirectory << "\" in "
-             << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
-
-   func_start = std::chrono::high_resolution_clock::now();
-   //writeAddressesToDirectories(strDirectory, vData);
-   write_addresses_to_directory_sorted(strDirectory, vData);
-   func_ende = std::chrono::high_resolution_clock::now();
-   runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
-   std::cout << vData.size() << " wrote to Directory \"" << strDirectory << "\" in "
-      << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
-
-   func_start = std::chrono::high_resolution_clock::now();
-   readAddressesFromDirectory(strDirectory, vData);
-   func_ende = std::chrono::high_resolution_clock::now();
-   runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
-   std::cout << vData.size() << " read from Directory \"" << strDirectory << "\" in "
-      << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
-
-   func_start = std::chrono::high_resolution_clock::now();
-   auto val = pushMatchingToFront(vData, 1000.0);
-   func_ende = std::chrono::high_resolution_clock::now();
-   runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
-   std::cout << val << " datasets partitioned in "
-      << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
-
-   func_start = std::chrono::high_resolution_clock::now();
-   sortAddressesInRange(vData, val);
-   func_ende = std::chrono::high_resolution_clock::now();
-   runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
-   std::cout << val << " datasets sorted in "
-      << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
-
-   func_start = std::chrono::high_resolution_clock::now();
-   WriteChatGPT(vData, strOutput, val);
-   func_ende = std::chrono::high_resolution_clock::now();
-   runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
-   std::cout << val << " datasets wrote to \"" << strOutput << "\" in "
-      << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
-
-*/
-
-
 
    std::cout << "\nFinished.\n";
 }
