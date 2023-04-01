@@ -113,7 +113,8 @@ all copies or substantial portions of the Software.
 
 This license agreement (the "Agreement") governs the terms under which the source code and data (collectively, "Software") made available in the Github Repository "Vergleichsprogramm" ("Repository") may be used. Please read this Agreement carefully before using the Software.
 
-License Grant
+## License Grant
+
 The owner of the Repository hereby grants a non-exclusive, perpetual license to use the Software subject to the following terms:
 
 a) The majority of the source code available in this Repository is licensed under the MIT License. This license allows you to use, copy, modify, and distribute the Software for any purpose, provided that the copyright notice and liability disclaimers are included in all copies and modifications.
@@ -122,14 +123,16 @@ b) Certain methods within the source code of the Software are licensed under the
 
 c) Input files in the Software are subject to the Data License Germany - Attribution - Version 2.0 (Datenlizenz DE 2.0). This license allows you to use, copy, modify, and distribute the relevant input files, provided that you give credit to the author and provide a link to this license.
 
-Limitations
+## Limitations
+
 The license grant in Section 1 is subject to the following limitations:
 
 a) You may not use the Software to conduct or promote illegal activities.
 
 b) You must ensure that all copies of the Software that you distribute to others include this license agreement and all copyright notices and liability disclaimers.
 
-Disclaimer of Warranties
+## Disclaimer of Warranties
+
 The Software is provided "as is" without any express or implied warranties, including but not limited to the implied warranties of merchantability, fitness for a particular purpose, and non-infringement of third-party rights. In no event shall the owner of the Repository be liable for any damages or losses arising out of the use of the Software or the inability to use the Software.
 
 Changes to the License Agreement
