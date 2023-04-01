@@ -111,7 +111,7 @@ all copies or substantial portions of the Software.
 
 # License Agreement for Repository "Vergleichsprogramm"
 
-This license agreement (the "Agreement") governs the terms under which the source code and data (collectively, "Software") made available in the Github Repository ("Repository") may be used. Please read this Agreement carefully before using the Software.
+This license agreement (the "Agreement") governs the terms under which the source code and data (collectively, "Software") made available in the Github Repository "Vergleichsprogramm" ("Repository") may be used. Please read this Agreement carefully before using the Software.
 
 License Grant
 The owner of the Repository hereby grants a non-exclusive, perpetual license to use the Software subject to the following terms:
