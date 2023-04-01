@@ -6,17 +6,21 @@
 
 /**
  * @brief Address or cadastral data
+ * Gemeinde commune
+ * Kreis district / country
+ * Bundesland federal land / state (German State)
+ * Stadtteil quarter
 */
 class TAddress {
    friend void swap(TAddress& lhs, TAddress& rhs) noexcept { lhs.swap(rhs); }
 private:
-   std::string strCity = "";  ///< Stadt, an der sich die Adresse befindet
-   std::string strStreet = "";  ///< Straße zu dieser Adresse
-   std::string strStreetNumber = "";  ///< Hausnummer zu dieser Straße
-   std::string strZipCode = "";  ///< Postleitzahl
-   std::string strUrbanUnit = "";  ///< Stadtbezirk
+   std::string strCity = "";           ///< Stadt, an der sich die Adresse befindet
+   std::string strStreet = "";         ///< Straße zu dieser Adresse
+   std::string strStreetNumber = "";   ///< Hausnummer zu dieser Straße
+   std::string strZipCode = "";        ///< Postleitzahl
+   std::string strUrbanUnit = "";      ///< Stadtbezirk
    std::string strUrbanUnit_Old = "";  ///< Stadtbezirk (alte Aufteilung)
-   std::string strDistrict = "";  ///< Ortsteil
+   std::string strDistrict = "";       ///< Ortsteil
 
 public:
    TAddress(void) {

@@ -172,18 +172,13 @@ inline void Sorting(data_vector<double>& vData) {
       };
 
    std::sort(std::execution::par, vData.begin(), vData.end(), [](auto const& lhs, auto const& rhs) {
-   //std::sort(vData.begin(), vData.end(), [](auto const& lhs, auto const& rhs) {
-      auto const& a = lhs.first;
-      auto const& b = rhs.first;
-      if (auto cmp = compare(a.City(), b.City()); cmp != 0) return cmp < 0;
-      if (auto cmp = compare(a.UrbanUnit(), b.UrbanUnit()); cmp != 0) return cmp < 0;
-      if (auto cmp = compare(a.District(), b.District()); cmp != 0) return cmp < 0;
-      if (auto cmp = a.ZipCode() <=> b.ZipCode(); cmp != 0) return cmp < 0;
-      if (auto cmp = compare(a.Street(), b.Street()); cmp != 0) return cmp < 0;
-      return compare_streetnumber2(a.StreetNumber(), b.StreetNumber());
+      if (auto cmp = compare(lhs.first.City(), rhs.first.City()); cmp != 0) return cmp < 0;
+      if (auto cmp = compare(lhs.first.UrbanUnit(), rhs.first.UrbanUnit()); cmp != 0) return cmp < 0;
+      if (auto cmp = compare(lhs.first.District(), rhs.first.District()); cmp != 0) return cmp < 0;
+      if (auto cmp = lhs.first.ZipCode() <=> rhs.first.ZipCode(); cmp != 0) return cmp < 0;
+      if (auto cmp = compare(lhs.first.Street(), rhs.first.Street()); cmp != 0) return cmp < 0;
+      return compare_streetnumber2(lhs.first.StreetNumber(), rhs.first.StreetNumber());
       });
-
-
    }
 
 
@@ -201,6 +196,10 @@ inline void DeleteDirectories(std::string const& strPath) {
 }
 
 inline void ReadFromDirectory(std::string const& strPath, data_vector<double>& vData) {
+   static auto constexpr is_dir  = [](auto const& p) { return fs::is_directory(p);  };
+   static auto constexpr is_file = [](auto const& p) { return fs::is_regular_file(p);  };
+   static auto constexpr cnt_items = [](auto const& p) { return std::distance(fs::directory_iterator{ p }, { }); };
+
    using detail_data = std::tuple<std::string, std::string, std::string, std::string>;
    using data_to_read = std::tuple<fs::path, std::string, std::vector<my_line_count>, detail_data>;
    using to_read_vec = std::vector<data_to_read>;
@@ -208,23 +207,27 @@ inline void ReadFromDirectory(std::string const& strPath, data_vector<double>& v
 
    try {
       std::vector<fs::path> cities;
+      cities.reserve(cnt_items(strPath));
       std::copy(fs::directory_iterator(strPath), fs::directory_iterator(), std::back_inserter(cities));
-      auto it_cities = std::partition(std::execution::par, cities.begin(), cities.end(), [](auto const& p) { return fs::is_directory(p); });
+      auto it_cities = std::partition(std::execution::par, cities.begin(), cities.end(), is_dir); // [](auto const& p) { return fs::is_directory(p); });
       std::for_each(cities.begin(), it_cities, [&to_read](auto& d) {
          std::string strCities = d.stem().string();
          std::vector<fs::path> units;
+         units.reserve(cnt_items(d));
          std::copy(fs::directory_iterator(d), fs::directory_iterator(), std::back_inserter(units));
-         auto it_units = std::partition(std::execution::par, units.begin(), units.end(), [](auto const& p) { return fs::is_directory(p); });
+         auto it_units = std::partition(std::execution::par, units.begin(), units.end(), is_dir); // [](auto const& p) { return fs::is_directory(p); });
          std::for_each(units.begin(), it_units, [&to_read, &strCities](auto& d) {
             std::string strUnit = d.stem().string();
             std::vector<fs::path> districts;
+            districts.reserve(cnt_items(d));
             std::copy(fs::directory_iterator(d), fs::directory_iterator(), std::back_inserter(districts));
-            auto it_districts = std::partition(std::execution::par, districts.begin(), districts.end(), [](auto const& p) { return fs::is_directory(p); });
+            auto it_districts = std::partition(std::execution::par, districts.begin(), districts.end(), is_dir); // [](auto const& p) { return fs::is_directory(p); });
             std::for_each(districts.begin(), it_districts, [&to_read, &strCities, &strUnit](auto& d) {
                std::string strDistrict = d.stem().string();
                std::vector<fs::path> streets;
+               streets.reserve(cnt_items(d));
                std::copy(fs::directory_iterator(d), fs::directory_iterator(), std::back_inserter(streets));
-               auto it_streets = std::partition(std::execution::par, streets.begin(), streets.end(), [](auto const& p) { return fs::is_is_regular_file(p); });
+               auto it_streets = std::partition(std::execution::par, streets.begin(), streets.end(), is_file); // [](auto const& p) { return fs::is_regular_file(p); });
                std::for_each(streets.begin(), it_streets, [&to_read, &strCities, &strUnit, &strDistrict](auto& d) {
                   std::string strStreet = d.stem().string();
                   detail_data data = { strCities, strUnit, strDistrict, strStreet };
@@ -241,83 +244,86 @@ inline void ReadFromDirectory(std::string const& strPath, data_vector<double>& v
       }
    }
 
+
+
+
+
 inline void WriteToDirectory(std::string const& strPath, data_vector<double>& vData) {
-   static constexpr auto lower = [](std::string&& strVal) {
-      std::transform(std::execution::par, strVal.begin(), strVal.end(), strVal.begin(), [](char val) { return std::tolower(val); });
-      return strVal;
-   };
-
-   static constexpr auto compare_streetnumber2 = [](std::string const& aSNr, std::string const& bSNr) noexcept {
-      int a_Nr, b_Nr;
-      auto [a_ptr, a_ec] { std::from_chars(aSNr.data(), aSNr.data() + aSNr.size(), a_Nr) };
-      auto [b_ptr, b_ec] { std::from_chars(bSNr.data(), bSNr.data() + bSNr.size(), b_Nr) };
-      if (auto cmp = a_Nr <=> b_Nr; cmp != 0) return cmp < 0;
-      else {
-         return lower(a_ptr) < lower(b_ptr);
-      }
-   };
-
-   static constexpr auto compare = [](auto const& a, auto const& b) noexcept {
-     // if (auto cmp = std::tie(a.first.City(), a.first.UrbanUnit(), a.first.District(), a.first.Street()) <=>
-     //                std::tie(b.first.City(), b.first.UrbanUnit(), b.first.District(), b.first.Street()); cmp != 0) return cmp < 0;
-      if (auto cmp = a.first.City() <=> b.first.City(); cmp != 0) return cmp < 0;
-      if (auto cmp = a.first.UrbanUnit() <=> b.first.UrbanUnit(); cmp != 0) return cmp < 0;
-      if (auto cmp = a.first.District() <=> b.first.District(); cmp != 0) return cmp < 0;
-      if (auto cmp = a.first.Street() <=> b.first.Street(); cmp != 0) return cmp < 0;
-      return compare_streetnumber2(a.first.StreetNumber(), b.first.StreetNumber());
+//   auto constexpr WriteToDirectory = [](std::string const& strPath, data_vector<double>& vData) {
+      static constexpr auto lower = [](std::string&& strVal) {
+         std::transform(std::execution::par, strVal.begin(), strVal.end(), strVal.begin(), [](char val) { return std::tolower(val); });
+         return strVal;
       };
 
-   std::sort(std::execution::par, vData.begin(), vData.end(), compare);
-
-   using tplParts = std::tuple<data_vector<double>::const_iterator, data_vector<double>::const_iterator, std::ostringstream>;
-   using myIterPair = std::tuple<data_vector<double>::const_iterator, data_vector<double>::const_iterator, fs::path>;
-   std::vector<myIterPair> positions;
-   fs::path myOldPath = ""s;
-   for(auto first = vData.begin(); first != vData.end();) {
-      auto const& [address, result] = *first;
-      fs::path myPath = fs::path(strPath) / address.City() / address.UrbanUnit() / address.District();
-      if(myPath != myOldPath) {
-         fs::create_directories(myPath);
-         myOldPath = myPath;
+      static constexpr auto to_number = [](auto const& val) { int ret;  std::from_chars(val.data(), val.data() + val.size(), ret); return ret; };
+      static constexpr auto compare_streetnumber2 = [](std::string const& aSNr, std::string const& bSNr) noexcept {
+         if (auto cmp = to_number(aSNr) <=> to_number(bSNr); cmp != 0) return cmp < 0;
+         else {
+            return aSNr < bSNr; //return lower(a_ptr) < lower(b_ptr);
          }
-      auto last = std::find_if(std::execution::par, first, vData.end(), [&first](auto const& val) {
-         return first->first.Street() != val.first.Street() ? true : 
-            (first->first.District() != val.first.District() ? true : 
-               (first->first.UrbanUnit() != val.first.UrbanUnit() ? true : 
+      };
+
+      static auto constexpr build = [](auto const& ref) { 
+         return std::tie(ref.first.City(), ref.first.UrbanUnit(), ref.first.District(), ref.first.Street()); 
+         };
+
+      static constexpr auto compare = [](auto const& a, auto const& b) noexcept {  
+         //if (auto cmp = build(a) <=> build(b); cmp != 0) return cmp < 0;
+         //if (auto cmp = std::tie(a.first.City(), a.first.UrbanUnit(), a.first.District(), a.first.Street()) <=>
+         //               std::tie(b.first.City(), b.first.UrbanUnit(), b.first.District(), b.first.Street()); cmp != 0) return cmp < 0;
+         //*
+         if (auto cmp = a.first.City() <=> b.first.City(); cmp != 0) return cmp < 0;
+         if (auto cmp = a.first.UrbanUnit() <=> b.first.UrbanUnit(); cmp != 0) return cmp < 0;
+         if (auto cmp = a.first.District() <=> b.first.District(); cmp != 0) return cmp < 0;
+         if (auto cmp = a.first.Street() <=> b.first.Street(); cmp != 0) return cmp < 0;
+         //*/
+         return compare_streetnumber2(a.first.StreetNumber(), b.first.StreetNumber());
+      };
+
+      static constexpr auto next = [](auto const& first, auto const& val) {
+         return first->first.Street() != val.first.Street() ? true :
+            (first->first.District() != val.first.District() ? true :
+               (first->first.UrbanUnit() != val.first.UrbanUnit() ? true :
                   (first->first.City() != val.first.City() ? true : false)));
-         });
-      positions.emplace_back(first, last, myPath / (first->first.Street() + ".csv"s));
-      first = last;
+      };
+
+      std::sort(std::execution::par, vData.begin(), vData.end(), compare);
+
+      using tplParts = std::tuple<data_vector<double>::const_iterator, data_vector<double>::const_iterator, std::ostringstream>;
+      using myIterPair = std::tuple<data_vector<double>::const_iterator, data_vector<double>::const_iterator, fs::path>;
+      std::vector<myIterPair> positions;
+      fs::path myOldPath = ""s;
+      for (auto first = vData.begin(); first != vData.end();) {
+         auto const& [address, result] = *first;
+         fs::path myPath = fs::path(strPath) / address.City() / address.UrbanUnit() / address.District();
+         if (myPath != myOldPath) {
+            fs::create_directories(myPath);
+            myOldPath = myPath;
+         }
+         auto last = std::find_if(std::execution::par, first, vData.end(), [&first](auto const& val) {
+            return first->first.Street() != val.first.Street() ? true :
+               (first->first.District() != val.first.District() ? true :
+                  (first->first.UrbanUnit() != val.first.UrbanUnit() ? true :
+                     (first->first.City() != val.first.City() ? true : false)));
+            });
+         positions.emplace_back(first, last, myPath / (first->first.Street() + ".csv"s));
+         first = last;
       }
 
-   auto size = std::distance(positions.cbegin(), positions.cend()) * 70;
-   std::for_each(std::execution::par, positions.cbegin(), positions.cend(), [size](auto const& val) {
-      std::string strBuffer;
-      strBuffer.reserve(size);
-      std::for_each(std::get<0>(val), std::get<1>(val), [&strBuffer](auto const& value) {
-         //auto const& [address, result] = value;
-         /*
-         ofs << address.StreetNumber() << ";" << address.ZipCode() << ";" << address.UrbanUnit_Old() << ";"
-            << my_Double_to_String(address.Latitude(), 9) << ";" << my_Double_to_String(address.Longitude(), 9) << ";"
-            << my_Double_to_String(result.first, 3) << ";" << my_Double_to_String(result.second, 1) << std::endl;
-         */
-         //*
-         std::format_to(std::back_inserter(strBuffer), "{};{};{};{};{};{};{}\n",
-                            value.first.StreetNumber(), value.first.ZipCode(), value.first.UrbanUnit_Old(),
-                            my_Double_to_String_short(value.first.Latitude(), 9), my_Double_to_String_short(value.first.Longitude(), 9),
-                            my_Double_to_String_short(value.second.first, 3), my_Double_to_String_short(value.second.second, 3));
-         //*/
-         /*
-         std::format_to(std::back_inserter(strBuffer), "{};{};{};{:.9f};{:.9f};{:.3f};{:.3f}\n",
-                        value.first.StreetNumber(), value.first.ZipCode(), value.first.UrbanUnit_Old(), 
-                        value.first.Latitude(), value.first.Longitude(),
-                        value.second.first, value.second.second);
-         */
+      //auto size = std::distance(positions.cbegin(), positions.cend()) * 70;
+      std::for_each(std::execution::par, positions.cbegin(), positions.cend(), [](auto const& val) {
+         std::string strBuffer;
+         //strBuffer.reserve(std::distance(std::get<0>(val), std::get<1>(val)));
+         std::for_each(std::get<0>(val), std::get<1>(val), [&strBuffer](auto const& value) {
+            std::format_to(std::back_inserter(strBuffer), "{};{};{};{};{};{};{}\n",
+            value.first.StreetNumber(), value.first.ZipCode(), value.first.UrbanUnit_Old(),
+            my_Double_to_String_short(value.first.Latitude(), 9), my_Double_to_String_short(value.first.Longitude(), 9),
+            my_Double_to_String_short(value.second.first, 3), my_Double_to_String_short(value.second.second, 3));
+            });
+         std::ofstream(std::get<2>(val)).write(strBuffer.data(), strBuffer.size());
          });
-      std::ofstream(std::get<2>(val)).write(strBuffer.data(), strBuffer.size());
-      });
 
-}
+   }
 
 
 
@@ -334,8 +340,9 @@ void Rechentest(std::string const& strFilename) {
    data_vector<double> vData;
    data_vector<double>::iterator it;
    Location<double> point    = { 52.520803, 13.40945 };
-   std::string strOutput_all = "D:\\Test\\Testausgabe_alle.txt"s;
-   std::string strOutput     = "D:\\Test\\Testausgabe.txt"s;
+   std::string strDirectory  = "E:\\Test";
+   std::string strOutput_all = strDirectory + "\\Testausgabe_alle.txt"s;
+   std::string strOutput     = strDirectory + "\\Testausgabe.txt"s;
 
    auto func_start = std::chrono::high_resolution_clock::now();
    Reading(vData, strFilename);
@@ -369,17 +376,17 @@ void Rechentest(std::string const& strFilename) {
 
 
    func_start = std::chrono::high_resolution_clock::now();
-   DeleteDirectories("d:\\Test");
+   DeleteDirectories(strDirectory);
    func_ende = std::chrono::high_resolution_clock::now();
    runtime = std::chrono::duration_cast<myTime_Duration>(func_ende - func_start);
-   std::cout << " directies deleted"
+   std::cout << " directories \"" << strDirectory << "\" deleted in "
       << std::setprecision(time_precision) << runtime.count() / time_factor << " sec\n";
 
    func_start = std::chrono::high_resolution_clock::now();
-   WriteToDirectory("D:\\Test", vData);
+   WriteToDirectory(strDirectory, vData);
    func_ende = std::chrono::high_resolution_clock::now();
    runtime = std::chrono::duration_cast<myTime_Duration>(func_ende - func_start);
-   std::cout << vData.size() << " datasets wrote to directies "
+   std::cout << vData.size() << " datasets wrote to directies \"" << strDirectory << "\" in "
       << std::setprecision(time_precision) << runtime.count() / time_factor << " sec\n";
 
 
