@@ -109,7 +109,7 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
 
-#License Agreement for Repository "Vergleichsprogramm"
+# License Agreement for Repository "Vergleichsprogramm"
 
 This license agreement (the "Agreement") governs the terms under which the source code and data (collectively, "Software") made available in the Github Repository ("Repository") may be used. Please read this Agreement carefully before using the Software.
 
