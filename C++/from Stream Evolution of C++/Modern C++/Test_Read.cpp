@@ -26,7 +26,7 @@
 using namespace std::literals;
 namespace fs = std::filesystem;
 
-const func_vector funcs = {
+const func_vector<double> funcs = {
    [](TData<double>& data, std::string const& val) { data.City(val); } ,
    //nullptr,
    [](TData<double>& data, std::string const& val) { data.Street(val); } ,
@@ -40,7 +40,7 @@ const func_vector funcs = {
    [](TData<double>&, std::string const&) { throw std::runtime_error("unexpected number of elements.");  }
 };
 
-const func_vector_vw funcs_vw = {
+const func_vector_vw<double> funcs_vw = {
    [](TData<double>& data, std::string_view const& val) { data.City(val); } ,
    [](TData<double>& data, std::string_view const& val) { data.Street(val); } ,
    [](TData<double>& data, std::string_view const& val) { data.StreetNumber(val); },
@@ -55,7 +55,8 @@ const func_vector_vw funcs_vw = {
 
 
 template <typename ty>
-inline size_t Read_0(data_vector<ty>& vData, func_vector const& funcs, std::istream& ifs) {
+requires std::floating_point<ty>
+inline size_t Read_0(data_vector<ty>& vData, func_vector<ty> const& funcs, std::istream& ifs) {
    size_t iLineCnt = 0u;
    std::string strRow;
    while (std::getline(ifs, strRow)) {
@@ -63,12 +64,7 @@ inline size_t Read_0(data_vector<ty>& vData, func_vector const& funcs, std::istr
          TData<double> data;
          auto input = tokenize(strRow, ";", 9);
          if (input.size() == 9) {
-#if defined __BORLANDC__
-            size_t iCnt = 0u;
-            for (auto const& element : input) { funcs[iCnt](data, input[iCnt]); ++iCnt; }
-#else
             for (size_t iCnt = 0u; auto const& element : input) { funcs[iCnt](data, input[iCnt]); ++iCnt; }
-#endif
             vData.emplace_back(std::make_pair(std::forward<TData<double>>(data), Result<ty>()));
             ++iLineCnt;
          }
@@ -78,7 +74,8 @@ inline size_t Read_0(data_vector<ty>& vData, func_vector const& funcs, std::istr
 }
 
 template <typename ty>
-inline size_t Read_1(data_vector<ty>& vData, func_vector const& funs, std::string const& buffer) {
+requires std::floating_point<ty>
+inline size_t Read_1(data_vector<ty>& vData, func_vector<ty> const& funs, std::string const& buffer) {
    size_t pos = 0u;
    for (auto end = buffer.find('\n'); end != std::string::npos; pos = end + 1u, end = buffer.find('\n', pos)) {
       size_t iCnt = 0u;
@@ -89,13 +86,14 @@ inline size_t Read_1(data_vector<ty>& vData, func_vector const& funs, std::strin
          funcs[iCnt++](data, buffer.substr(pos, tmp - pos));
          pos = tmp + 1;
       } while (pos < end);
-      vData.emplace_back(std::make_pair(std::forward<TData<double>>(data), Result<ty>()));
+      vData.emplace_back(std::make_pair(std::forward<TData<ty>>(data), Result<ty>()));
    }
    return vData.size();
 }
 
 template <typename ty>
-inline size_t Read_2(data_vector<ty>& vData, func_vector_vw const& funcs, std::string const& buffer) {
+requires std::floating_point<ty>
+inline size_t Read_2(data_vector<ty>& vData, func_vector_vw<ty> const& funcs, std::string const& buffer) {
    std::string_view view(buffer.c_str(), buffer.size());
    using my_size_t = typename data_vector<ty>::size_type;
    using my_pair = std::pair< my_size_t, my_size_t>;
@@ -108,7 +106,7 @@ inline size_t Read_2(data_vector<ty>& vData, func_vector_vw const& funcs, std::s
          funcs[iCnt++](data, view.substr(pos, tmp - pos));
          pos = tmp + 1;
       } while (pos < end);
-      vData.emplace_back(std::make_pair(std::forward<TData<double>>(data), Result<ty>()));
+      vData.emplace_back(std::make_pair(std::forward<TData<ty>>(data), Result<ty>()));
    }
    return vData.size();
 }
@@ -124,6 +122,52 @@ auto OpenFile(std::string const& strFilename, bool boText = true) {
    }
    return ifs;
 }
+
+template <typename ty>
+requires std::floating_point<ty>
+inline void Write(typename data_vector<ty>::const_iterator begin, typename data_vector<ty>::const_iterator end, std::ostream& os) {
+   //os.setf(std::ios::showpoint);
+   //os.setf(std::ios::fixed);
+   //os.precision(6);
+   /*
+   std::for_each(vData.cbegin(), vData.cend(), [&os](auto const& val) {
+      os << val.first.ZipCode() << " " << val.first.City() << " / " << val.first.UrbanUnit() << ", "
+         << val.first.Street() << " " << val.first.StreetNumber()
+         << " -> (" << std::setprecision(6) << val.first.Latitude() << ", "
+         << std::setprecision(6) << val.first.Longitude() << ") -> "
+         << std::setprecision(3) << val.second.first << "m in "
+         << std::setprecision(1) << val.second.second << "°\n";
+   */
+
+   /*
+   std::for_each(begin, end, [&os](auto const& val) {
+      os << val.first.ZipCode() << " " << val.first.City() << " / " << val.first.UrbanUnit() << ", "
+         << val.first.Street() << " " << val.first.StreetNumber()
+         << " -> (" << my_Double_to_String_G(val.first.Latitude(), 6) << ", "
+         << my_Double_to_String_G(val.first.Longitude(), 6) << ") -> "
+         << my_Double_to_String_G(val.second.first, 3) << "m in "
+         << my_Double_to_String_G(val.second.second, 1) << "°\n";
+      });
+   */
+   ///*
+   std::string strBuffer;
+   std::for_each(begin, end, [&strBuffer](auto const& val) {
+      auto const& [address, result] = val;
+      std::format_to(std::back_inserter(strBuffer), "{};{};{};{};{};{:.9f};{:.9f};{:.3f};{:.1f}\n",
+         address.ZipCode(), address.City(), address.UrbanUnit(), address.Street(), address.StreetNumber(),
+         address.Latitude(), address.Longitude(), result.first, result.second);
+      });
+   os.write(strBuffer.data(), strBuffer.size());
+   //*/
+}
+
+
+template <typename ty>
+inline void Write(data_vector<ty> const& vData, std::ostream& os) {
+   Write<ty>(vData.cbegin(), vData.cend(), os);
+}
+
+
 
 auto Test1(std::string const& strFilename) {
    auto ifs = OpenFile(strFilename);
