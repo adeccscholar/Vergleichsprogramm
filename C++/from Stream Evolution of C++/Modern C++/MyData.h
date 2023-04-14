@@ -42,6 +42,7 @@ public:
 
    virtual TAddress* create() override { return new TData<ty>; }
    virtual void init(void) override { TAddress::init();  _init(); };
+
    virtual void copy(TAddress const& ref) override {
       TAddress::copy(ref);
       try {
@@ -66,17 +67,17 @@ public:
    void Latitude(std::string&& newVal) { auto result = std::from_chars(newVal.data(), newVal.data() + newVal.size(), mLoc.first); }  // mLoc.first = std::stod(newVal); }
    void Longitude(std::string&& newVal) { auto result = std::from_chars(newVal.data(), newVal.data() + newVal.size(), mLoc.second); } //mLoc.second = std::stod(newVal); }
 
+   /*
    void Latitude(std::string_view const& newVal) { auto result = std::from_chars(newVal.data(), newVal.data() + newVal.size(), mLoc.first); }  // mLoc.first = std::stod(newVal); }
    void Longitude(std::string_view const& newVal) { auto result = std::from_chars(newVal.data(), newVal.data() + newVal.size(), mLoc.second); } //mLoc.second = std::stod(newVal); }
+   */
+   void Latitude(std::string_view newVal) { auto result = std::from_chars(newVal.data(), newVal.data() + newVal.size(), mLoc.first); }  // mLoc.first = std::stod(newVal); }
+   void Longitude(std::string_view newVal) { auto result = std::from_chars(newVal.data(), newVal.data() + newVal.size(), mLoc.second); } //mLoc.second = std::stod(newVal); }
 
 private:
    void _init(void) { mLoc = { 0.0, 0.0 }; }
    void _copy(TData const& ref) { mLoc = ref.mLoc; }
-
-   void _swap(TData& ref) noexcept {
-      std::swap(mLoc, ref.mLoc);
-   }
-
+   void _swap(TData& ref) noexcept { std::swap(mLoc, ref.mLoc); }
 };
 
 
@@ -90,7 +91,7 @@ using func_vector = std::vector<std::function<void(TData<ty>&, std::string const
 
 template <typename ty>
 requires std::floating_point<ty>
-using func_vector_vw = std::vector<std::function<void(TData<ty>&, std::string_view const&)>>;
+using func_vector_vw = std::vector<std::function<void(TData<ty>&, std::string_view)>>;
 
 
 template< typename ty>

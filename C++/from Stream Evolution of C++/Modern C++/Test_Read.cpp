@@ -39,7 +39,7 @@ const func_vector<double> funcs = {
    [](TData<double>& data, std::string const& val) { data.Longitude(val); },
    [](TData<double>&, std::string const&) { throw std::runtime_error("unexpected number of elements.");  }
 };
-
+/*
 const func_vector_vw<double> funcs_vw = {
    [](TData<double>& data, std::string_view const& val) { data.City(val); } ,
    [](TData<double>& data, std::string_view const& val) { data.Street(val); } ,
@@ -52,7 +52,19 @@ const func_vector_vw<double> funcs_vw = {
    [](TData<double>& data, std::string_view const& val) { data.Longitude(val); },
    [](TData<double>&, std::string_view const&) { throw std::runtime_error("unexpected number of elements.");  }
 };
-
+*/
+const func_vector_vw<double> funcs_vw = {
+   [](TData<double>& data, std::string_view val) { data.City(val); } ,
+   [](TData<double>& data, std::string_view val) { data.Street(val); } ,
+   [](TData<double>& data, std::string_view val) { data.StreetNumber(val); },
+   [](TData<double>& data, std::string_view val) { data.ZipCode(val); },
+   [](TData<double>& data, std::string_view val) { data.UrbanUnit(val); },
+   [](TData<double>& data, std::string_view val) { data.UrbanUnit_Old(val); },
+   [](TData<double>& data, std::string_view val) { data.District(val); },
+   [](TData<double>& data, std::string_view val) { data.Latitude(val); },
+   [](TData<double>& data, std::string_view val) { data.Longitude(val); },
+   [](TData<double>&, std::string_view const&) { throw std::runtime_error("unexpected number of elements.");  }
+};
 
 template <typename ty>
 requires std::floating_point<ty>

@@ -4,6 +4,8 @@
 #include <string_view>
 #include <functional>
 
+using namespace std::literals;
+
 /**
  * @brief Address or cadastral data
  * Gemeinde commune
@@ -12,6 +14,12 @@
  * Stadtteil quarter
 */
 class TAddress {
+   friend std::ostream& operator << (std::ostream& out, TAddress const& data) {
+      out << data.strZipCode << (data.strZipCode.length() > 0 ? " "s : ""s) << data.strCity
+          << ", "s << data.strStreet << (data.strStreetNumber.length() > 0 ? " "s : ""s)
+          << data.strStreetNumber;
+      return out;
+      }
    friend void swap(TAddress& lhs, TAddress& rhs) noexcept { lhs.swap(rhs); }
 private:
    std::string strCity = "";           ///< Stadt, an der sich die Adresse befindet
@@ -25,15 +33,15 @@ private:
 public:
    TAddress(void) {
       _init();
-   }
+      }
 
    TAddress(TAddress const& ref) {
       _copy(ref);
-   }
+      }
 
    TAddress(TAddress&& ref) noexcept {
       swap(ref);
-   }
+      }
 
 
    virtual ~TAddress(void) = default;
@@ -93,6 +101,7 @@ public:
    void District(std::string&& newVal) { strDistrict = std::forward<std::string>(newVal); }
 
    /// Manipulatoren 
+   /*
    void City(std::string_view const& newVal) { strCity = std::move(std::string{ newVal.data(), newVal.size() }); }
    void Street(std::string_view const& newVal) { strStreet = std::move(std::string{ newVal.data(), newVal.size() }); }
    void StreetNumber(std::string_view const& newVal) { strStreetNumber = std::move(std::string{ newVal.data(), newVal.size() }); }
@@ -100,7 +109,14 @@ public:
    void UrbanUnit(std::string_view const& newVal) { strUrbanUnit = std::move(std::string{ newVal.data(), newVal.size() }); }
    void UrbanUnit_Old(std::string_view const& newVal) { strUrbanUnit_Old = std::move(std::string{ newVal.data(), newVal.size() }); }
    void District(std::string_view const& newVal) { strDistrict = std::move(std::string{ newVal.data(), newVal.size() }); }
-
+   */
+   void City(std::string_view newVal) { strCity =  newVal ; }
+   void Street(std::string_view newVal) { strStreet = newVal; }
+   void StreetNumber(std::string_view newVal) { strStreetNumber = newVal; }
+   void ZipCode(std::string_view newVal) { strZipCode = newVal; }
+   void UrbanUnit(std::string_view newVal) { strUrbanUnit = newVal; }
+   void UrbanUnit_Old(std::string_view newVal) { strUrbanUnit_Old = newVal; }
+   void District(std::string_view newVal) { strDistrict = newVal; }
 
 private:
    void _init(void) {

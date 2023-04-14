@@ -37,6 +37,10 @@
 *.user
 *.aps
 
+#intel vtune
+vtune
+Intel® VTune™ Profiler Results
+
 # special embarcadero files or directories
 __history
 __astcache

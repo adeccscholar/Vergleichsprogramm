@@ -9,7 +9,7 @@
 #include <charconv>
 #include <cstdlib>
 #include <concepts>
-
+#include <format>
 
 struct TMyNum : public std::numpunct<char> {
    char_type   do_decimal_point() const { return ','; }
@@ -57,8 +57,8 @@ inline constexpr std::vector<std::string> tokenize(std::string const& strInput, 
 
 
 template <typename ty>
-   requires std::integral<ty>
-ty constexpr string_to_int(std::string const& strValue) {
+requires std::integral<ty>
+inline ty constexpr string_to_int(std::string const& strValue) {
    ty value = 0;
    /*auto [ptr, ec] =*/ std::from_chars(strValue.data(), strValue.data() + strValue.size(), value);
    // Fehlerbehandlung
@@ -74,7 +74,7 @@ inline constexpr std::string my_Double_to_String(ty const& value) {
 }
 
 template <typename ty>
-   requires std::floating_point<ty>
+requires std::floating_point<ty>
 inline constexpr std::string my_Double_to_String_short(ty const& value, int iPrecision) {
    std::string target{ "0000000000000000" };
    std::to_chars(target.data(), target.data() + target.size(), value, std::chars_format::fixed, iPrecision);
@@ -92,9 +92,7 @@ inline constexpr std::string my_Double_to_String(std::floating_point auto const&
 }
 
 
-template <typename ty>
-requires std::floating_point<ty>
-inline constexpr std::string my_Double_to_String_G(ty const& value, int iPrecision) {
+inline constexpr std::string [[nodiscard]] my_Double_to_String_G(std::floating_point auto const& value, int iPrecision) {
    std::array<char, 18> target;
    auto [ptrValue, ec] = std::to_chars(target.data(), target.data() + target.size(), value, std::chars_format::fixed, iPrecision);
    auto itPoint = std::find(target.begin(), target.end(), '.');
@@ -106,8 +104,9 @@ inline constexpr std::string my_Double_to_String_G(ty const& value, int iPrecisi
       for (size_t a = start == 3 ? 1 : 0; a < d.quot; ++a) {
          strVal.insert(strVal.begin() + start, '.');
          start += 4;
-      }
+         }
       return strVal;
-   }
+      }
    else return strVal;
    }
+
