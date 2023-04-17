@@ -23,13 +23,10 @@
 #include <vector>
 #include <map>
 #include <fstream>
-#include <functional>
-#include <optional> // !! C++17
-#include <thread>
 #include <format>
 
 #include <chrono>
-#include <ranges>
+
 
 
 void Rechentest(std::string const& strDirectory, int iCount = 1) {
@@ -92,9 +89,12 @@ void Rechentest(std::string const& strDirectory, int iCount = 1) {
             value_size },
       { "sort part"s, "sort partitioned data "s, "partitioned datasets sorted"s,
             [&vData, &it]() { std::sort(std::execution::par, vData.begin(), it, [](auto const& lhs, auto const& rhs) {
-                                    if (lhs.second.first != rhs.second.first) return lhs.second.first > rhs.second.first;
-                                    else return lhs.second.second < rhs.second.second; }); },
-            value_size },
+                                    if (auto cmp = lhs.second.first <=> rhs.second.first; cmp != 0) [[likely]] return cmp > 0;
+                                    else if (auto cmp = lhs.second.second <=> rhs.second.second; cmp != 0) return cmp < 0; 
+                                    else if (auto cmp = lhs.first.Street() <=> rhs.first.Street(); cmp != 0) return cmp < 0;
+                                    else return lhs.first.StreetNumber() < rhs.first.StreetNumber();
+                                    });
+                             }, value_size },
       { "write part"s, "write this data to "s + strOutput, "datasets wrote to file"s,
             [&vData, &it, &strOutput]() { WritingPart<double>(vData.begin(), it, strOutput); } ,
             value_size }
@@ -122,12 +122,27 @@ void Rechentest(std::string const& strDirectory, int iCount = 1) {
    WriteStart<double>(std::cout, test);
    std::cout << std::endl;
 
+   
+   try {
+      std::cout << std::format("Check Input with {} ... ", "D:\\Test_Reference");
+      auto func_start = myClock::now();
+      Compare_Input(strDirectory, "D:\\Test_Reference");
+      auto func_ende = myClock::now();
+      auto runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
+      std::cout << std::format(" Done in {:.{}f} sec\n\n", runtime.count() / time_factor, time_prec);
+      }
+   catch(std::exception& ex) {
+      std::cout << std::format("Error while checking input files: {}\n", ex.what());
+      return;
+      }
+   
    for(int step : std::ranges::iota_view{ 0, test.iTestCases }) {
-      std::cout << get_current_time_and_date() << " start run " << step + 1 << " of " << iCount << std::endl;
+      std::cout << std::format("{2:} start run {0:} of {1:}\n", step + 1, iCount, get_current_time_and_date());
+      //std::cout << get_current_time_and_date() << " start run " << step + 1 << " of " << iCount << std::endl;
       auto time_for_all = myTimeType::zero();
       std::vector<double> measurement;
       for (auto const& test_func : test_funcs) {
-         std::cout << get_current_time_and_date() << " " << std::left << std::setw(45) << std::get<1>(test_func) << "-";
+         std::cout << std::format("{} {:<45s}-", get_current_time_and_date(), std::get<1>(test_func));
          try {
             auto func_start = myClock::now();
             std::get<3>(test_func)();
@@ -135,10 +150,11 @@ void Rechentest(std::string const& strDirectory, int iCount = 1) {
             auto runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
             measurement.emplace_back(runtime.count() / time_factor);
             time_for_all += runtime;
-            if (std::get<4>(test_func)()) { std::cout  << std::right << std::setw(9) << *std::get<4>(test_func)() << " "; }
-            else { std::cout << "          "; }
-            std::cout << std::left << std::setw(30) << std::get<2>(test_func) << " in " << std::right
-                       << std::setw(9) << std::setprecision(time_prec) << runtime.count() / time_factor << " sec\n";
+ 
+            if (auto val = std::get<4>(test_func)(); val) std::cout << std::format("{:>9} ", *val); 
+            else  std::cout << "          "; 
+     
+            std::cout << std::format("{:<30} in {:9.{}f} sec\n", std::get<2>(test_func), runtime.count() / time_factor, time_prec);
             std::this_thread::sleep_for(std::chrono::milliseconds(250));
             }
          catch (std::exception& ex) {
@@ -149,12 +165,26 @@ void Rechentest(std::string const& strDirectory, int iCount = 1) {
       test.measurements.emplace_back(measurement);
       std::cout << std::endl << get_current_time_and_date() << " " << std::left << "time for all operations " 
                 << std::right << std::setw(9) << std::setprecision(time_prec) << time_for_all.count() / time_factor << " sec\n";
-      std::cout << "\n";
+      std::cout << "\n"s;
+      std::cout << std::format("Check with directory {} ...", "D:\\Test_Reference");
+      
+      try {
+         auto func_start = myClock::now();
+         Compare_Output(strDirectory, "D:\\Test_Reference");
+         auto func_ende = myClock::now();
+         auto runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
+         std::cout << std::format(" Done in {:.{}f} sec\n\n", runtime.count() / time_factor, time_prec);
+         }
+      catch(std::exception& ex) {
+         std::cout << std::format("Error while checking input files: {}\n", ex.what());
+         return;
+         }
+      
       if(step + 1 < test.iTestCases) {
          static const std::string strWait = "clear all data and wait ... | "s;
          auto Clear = []() {
             for (int s = 0; s < strWait.size(); ++s) {
-               std::cout << '\b' << ' ' << '\b';
+               std::cout << "\b \b";
                std::this_thread::sleep_for(std::chrono::milliseconds(5));
                }
             };
@@ -203,6 +233,7 @@ int main(int argc, char* argv[]) {
 
    Rechentest(strInput, iCount);
 
+   //Compare_Output("e:\\Test", "D:\\Test_Reference");
    
    //std::thread t(Rechentest, std::cref(strInput));
    //t.join();

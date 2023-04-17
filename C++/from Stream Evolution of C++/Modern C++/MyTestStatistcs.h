@@ -27,7 +27,6 @@ inline [[nodiscard]] std::string get_current_time_and_date(void) {
 }
 
 inline [[nodiscard]] std::string get_current_timestamp(void) {
-   //return std::format("{:%Y%m%d%H%M}", std::chrono::current_zone()->to_local(std::chrono::system_clock::now()));
    return get_current_timestamp(std::chrono::system_clock::now());
 }
 
@@ -114,6 +113,8 @@ void WriteStart(std::ostream& out, TTestData<ty> test) {
       << " - start time:                " << get_current_time_and_date(test.start_time) << "\n"s
       << " - detail data saved in file: \""s << test.strProtocol << "\"\n"s
       << " - overview saved in file:    \""s << test.strOverview << "\"\n"s;
+
+   //out << std::format
 }
 
 template <typename ty>
@@ -121,33 +122,48 @@ template <typename ty>
 void WriteProtocol(std::ostream& out, TTestData<ty> test) {
    out.setf(std::ios::fixed);
    out.setf(std::ios::showpoint);
-   for (int i = 0; auto const& caption : test.captions_short) out << (i++ > 0 ? ";"s : ""s) << caption;
+
+   out << std::format("{}", *test.captions_short.cbegin());
+   for (auto const& caption : std::ranges::subrange(test.captions_short.cbegin() + 1, test.captions_short.cend())) out << std::format(";{}", caption);
    out << std::endl;
    for (auto const& v : test.measurements) {
-      for (int i = 0; auto const& val : v) out << (i++ > 0 ? ";"s : ""s) << std::setprecision(test.prec) << val;
+      out << std::format(test.loc, "{1:.{0}f}", test.prec, *v.cbegin());
+      std::ranges::subrange w(v.cbegin() + 1, v.cend());
+      for (auto const& val : w) out << std::format(test.loc, ";{1:.{0}f}", test.prec, val);
       out << std::endl;
-   }
+      }
 }
 
 template <typename ty>
    requires std::floating_point<ty>
 void WriteStatistic(std::ostream& out, TTestData<ty> test) {
+   static auto constexpr print_caption = [](std::ostream& out) {
+      out << std::format("| {0:>46}{1:>9}{0:>2}{2:>11}{0:>2}{3:>11}{0:>2}{4:>11}{0:>2}{5:>11}{0:>2}{6:>11}{0:>2}{7:>11}\n", 
+                         "|", "count", "minimum", "mean", "median", "maximum", "variance", "std_dev");
+      };
+   static auto constexpr print_line = [](std::ostream& out) {
+      out << std::format("| {0:->46}{0:->11}{0:->13}{0:->13}{0:->13}{0:->13}{0:->13}{1:->13}\n", "+", "-");
+      };
+
+   auto constexpr print_data = [&test](std::ostream& out, std::string const& test_name, Statistical_Data<ty> const& stats) {
+      out << std::format("| {2:<45s}{1}{3:>9d}{1:^3}{4:10.{0}f}{1:^3}{5:10.{0}f}{1:^3}{6:10.{0}f}{1:^3}{7:10.{0}f}{1:^3}{8:10.{0}f}{1:^3}{9:10.{0}f}\n",
+         test.prec, "|", test_name, stats.count, stats.minimum, stats.mean, stats.median, stats.maximum, stats.variance, stats.std_deviation);
+      };
+
+   auto constexpr print_sum = [&test](std::ostream& out, std::string const& test_name, Statistical_Data<ty> const& stats) {
+      out << std::format("| {2:<45s}{1}{3:>9}{1:^3}{4:10.{0}f}{1:^3}{5:10.{0}f}{1:^3}{6:10.{0}f}{1:^3}{7:10.{0}f}\n",
+         test.prec, "|", test_name, " ", stats.minimum, stats.mean, stats.median, stats.maximum);
+      };
+
    out.setf(std::ios::fixed);
    out.setf(std::ios::showpoint);
 
    WriteStart(out, test);
    out << " - end time:                  " << get_current_time_and_date(test.end_time) << "\n\n"s;
 
-   out << std::right << std::setw(46) << "|"
-       << std::right << std::setw(9)  << "count" << " | "
-       << std::right << std::setw(10) << "minimum" << " | "
-       << std::right << std::setw(10) << "mean" << " | "
-       << std::right << std::setw(10) << "median" << " | "
-       << std::right << std::setw(10) << "maximum" << " | "
-       << std::right << std::setw(10) << "variance" << " | "
-       << std::right << std::setw(10) << "std_dev" << ""
-       << std::endl;
-   out << std::setfill('-') << std::setw(134) << "-" << std::setfill(' ') << std::endl;
+   print_caption(out);
+   print_line(out);
+   
    std::vector<std::vector<double>> random_values;
    for (int i = 0; i < test.captions.size() + 1; ++i) {
       std::vector<double> series;
@@ -157,36 +173,13 @@ void WriteStatistic(std::ostream& out, TTestData<ty> test) {
 
    Statistical_Data<double> sum;
    for (int i = 0; auto const& test_name : test.captions) {
-      auto stats = CalculateStats(random_values[i++]);
+      const auto stats = CalculateStats(random_values[i++]);
       sum = sum + stats;
-      out << std::left << std::setw(45) << test_name << "|"
-          << std::right << std::setw(9) << stats.count << " | "
-          << std::right << std::setw(10) << std::setprecision(test.prec) << stats.minimum << " | "
-          << std::right << std::setw(10) << std::setprecision(test.prec) << stats.mean << " | "
-          << std::right << std::setw(10) << std::setprecision(test.prec) << stats.median << " | "
-          << std::right << std::setw(10) << std::setprecision(test.prec) << stats.maximum << " | "
-          << std::right << std::setw(10) << std::setprecision(test.prec) << stats.variance << " | "
-          << std::right << std::setw(10) << std::setprecision(test.prec) << stats.std_deviation
-          << std::endl;
-   }
+      print_data(out, test_name, stats);
+      }
 
    auto stats = CalculateStats(random_values[test.captions.size()]);
-   out << std::left << std::setw(45) << "total time"s << "| "
-      << std::right << std::setw(8) << stats.count << " | "
-      << std::right << std::setw(10) << std::setprecision(test.prec) << stats.minimum << " | "
-      << std::right << std::setw(10) << std::setprecision(test.prec) << stats.mean << " | "
-      << std::right << std::setw(10) << std::setprecision(test.prec) << stats.median << " | "
-      << std::right << std::setw(10) << std::setprecision(test.prec) << stats.maximum << " | "
-      << std::right << std::setw(10) << std::setprecision(test.prec) << stats.variance << " | "
-      << std::right << std::setw(10) << std::setprecision(test.prec) << stats.std_deviation
-      << std::endl;
-
-   out << std::left << std::setw(45) << "cumulated time"s << "| "
-       << std::right << std::setw(8) << " " << " | "
-       << std::right << std::setw(10) << std::setprecision(test.prec) << sum.minimum << " | "
-       << std::right << std::setw(10) << std::setprecision(test.prec) << sum.mean << " | "
-       << std::right << std::setw(10) << std::setprecision(test.prec) << sum.median << " | "
-       << std::right << std::setw(10) << std::setprecision(test.prec) << sum.maximum
-       << std::endl;
-
-}
+   print_line(out);
+   print_data(out, "total time", stats);
+   print_sum(out, "cumulated time", sum);
+   }

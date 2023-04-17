@@ -83,15 +83,10 @@ struct my_lines {
 
 };
 
-template <typename ty>
 struct my_line {
-   my_line(void) : theText(), data() { }
-   my_line(std::string_view const& input) : theText(input), data() { }
-
-   operator ty && () { return std::forward<ty>(data);  }
-
-   std::string_view theText;
-   ty               data;
+   my_line(void) : view() { }
+   my_line(std::string_view const& input) : view(input) { }
+   std::string_view view;
 };
 
 

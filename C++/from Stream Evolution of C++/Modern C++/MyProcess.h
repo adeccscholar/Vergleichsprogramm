@@ -24,22 +24,22 @@
 using namespace std::literals;
 namespace fs = std::filesystem;
 
+// nur nutzen, wenn nicht parallel
+inline std::string_view GetContent(fs::path const& strFile, std::string& strBuffer) {
+   std::ifstream ifs(strFile, std::ifstream::in | std::ifstream::binary);
+   if (!ifs.is_open()) [[unlikely]] throw std::runtime_error("file \""s + strFile.string() + "\" can't opened"s);
+   const auto iSize = fs::file_size(strFile);
+   strBuffer.resize(iSize);
+   ifs.rdbuf()->pubsetbuf(strBuffer.data(), strBuffer.size());
+   ifs.read(strBuffer.data(), iSize);
+   ifs.close();
+   return { strBuffer.data(), strBuffer.size() };
+   }
+
 template <typename ty>
    requires std::floating_point<ty>
-inline void Reading(data_vector<ty>& vData, std::string const& strFile) {
+inline void Reading(data_vector<ty>& vData, fs::path const& strFile) {
    static const func_vector_vw<ty> funcs_vw = {
-      /*
-      [](TData<ty>& data, std::string_view const& val) { data.City(val); } ,
-      [](TData<ty>& data, std::string_view const& val) { data.Street(val); } ,
-      [](TData<ty>& data, std::string_view const& val) { data.StreetNumber(val); },
-      [](TData<ty>& data, std::string_view const& val) { data.ZipCode(val); },
-      [](TData<ty>& data, std::string_view const& val) { data.UrbanUnit(val); },
-      [](TData<ty>& data, std::string_view const& val) { data.UrbanUnit_Old(val); },
-      [](TData<ty>& data, std::string_view const& val) { data.District(val); },
-      [](TData<ty>& data, std::string_view const& val) { data.Latitude(val); },
-      [](TData<ty>& data, std::string_view const& val) { data.Longitude(val); },
-      [](TData<ty>&, std::string_view const&) { throw std::runtime_error("unexpected number of elements.");  }
-      */
       [](TData<ty>& data, std::string_view val) { data.City(val); } ,
       [](TData<ty>& data, std::string_view val) { data.Street(val); } ,
       [](TData<ty>& data, std::string_view val) { data.StreetNumber(val); },
@@ -52,6 +52,7 @@ inline void Reading(data_vector<ty>& vData, std::string const& strFile) {
       [](TData<ty>&, std::string_view) { throw std::runtime_error("unexpected number of elements.");  }
    };
 
+   /*
    const auto iSize = fs::file_size(strFile);
    //std::string strBuffer(iSize, '\0');
    std::string strBuffer;
@@ -62,6 +63,9 @@ inline void Reading(data_vector<ty>& vData, std::string const& strFile) {
    ifs.read(strBuffer.data(), iSize);
    ifs.close();
    std::string_view test(strBuffer.data(), strBuffer.size());
+   */
+   std::string strBuffer;
+   auto test = GetContent(strFile, strBuffer);
 
    my_line_count::reset();
    std::vector<my_line_count> lines;
@@ -207,21 +211,15 @@ inline void Sorting(data_vector<ty>& vData) {
          auto cleft = cleft_pos != std::string::npos;
          auto cright = cright_pos != std::string::npos;
 
-         if (!cleft && !cright) [[likely]] return ret;
+         if (cleft && cright) [[likely]] return normalize(left, cleft_pos) <=> normalize(right, cright_pos);
          else if (!cleft && cright)  return left <=> normalize(right, cright_pos);
          else if (cleft && !cright)  return normalize(left, cleft_pos) <=> right;
-         else return normalize(left, cleft_pos) <=> normalize(right, cright_pos);
+         else [[unlikely]] return ret;
       }
    };
 
-   static constexpr auto lower = [](std::string&& strVal) {
-      std::transform(std::execution::par, strVal.begin(), strVal.end(), strVal.begin(), [](char val) { return std::tolower(val); });
-      return strVal;
-   };
-
-
    static constexpr auto compare_streetnumber2 = [](std::string const& aSNr, std::string const& bSNr) noexcept {
-      int a_Nr, b_Nr;
+      unsigned int a_Nr, b_Nr;
       auto [a_ptr, a_ec] { std::from_chars(aSNr.data(), aSNr.data() + aSNr.size(), a_Nr) };
       auto [b_ptr, b_ec] { std::from_chars(bSNr.data(), bSNr.data() + bSNr.size(), b_Nr) };
       if (auto cmp = a_Nr <=> b_Nr; cmp != 0) [[likely]] return cmp < 0;
@@ -231,12 +229,14 @@ inline void Sorting(data_vector<ty>& vData) {
    };
 
    std::sort(std::execution::par, vData.begin(), vData.end(), [](auto const& lhs, auto const& rhs) {
-      if (auto cmp = compare(lhs.first.City(), rhs.first.City()); cmp != 0) return cmp < 0;
-      else if (auto cmp = compare(lhs.first.UrbanUnit(), rhs.first.UrbanUnit()); cmp != 0) return cmp < 0;
-      else if (auto cmp = compare(lhs.first.District(), rhs.first.District()); cmp != 0) return cmp < 0;
-      else if (auto cmp = lhs.first.ZipCode() <=> rhs.first.ZipCode(); cmp != 0) return cmp < 0;
-      else if (auto cmp = compare(lhs.first.Street(), rhs.first.Street()); cmp != 0) [[likely]] return cmp < 0;
-      return compare_streetnumber2(lhs.first.StreetNumber(), rhs.first.StreetNumber());
+      bool boRetval;
+      if (auto cmp = compare(lhs.first.City(), rhs.first.City()); cmp != 0) [[unlikely]] boRetval = cmp < 0;
+      else if (auto cmp = compare(lhs.first.UrbanUnit(), rhs.first.UrbanUnit()); cmp != 0) boRetval = cmp < 0;
+      else if (auto cmp = compare(lhs.first.District(), rhs.first.District()); cmp != 0) boRetval = cmp < 0;
+      else if (auto cmp = lhs.first.ZipCode() <=> rhs.first.ZipCode(); cmp != 0) boRetval = cmp < 0;
+      else if (auto cmp = compare(lhs.first.Street(), rhs.first.Street()); cmp != 0) boRetval = cmp < 0;
+      else boRetval = compare_streetnumber2(lhs.first.StreetNumber(), rhs.first.StreetNumber());
+      return boRetval;
       });
 }
 
@@ -252,34 +252,17 @@ inline void DeleteDirectories(std::string const& strPath) {
       files.reserve(std::distance(fs::directory_iterator(p), fs::directory_iterator()));
       std::copy(fs::directory_iterator(p), fs::directory_iterator(), std::back_inserter(files));
       auto it_dir = std::partition(std::execution::par, files.begin(), files.end(), [](fs::path const& p) { return !fs::is_directory(p); });
-      if (boDelete) std::for_each(std::execution::par, files.begin(), it_dir, [](fs::path const& p) { fs::remove(p); });
-      std::for_each(std::execution::par, it_dir, files.end(), [](fs::path const& p2) { ClearDir(p2, true); } );
+      if (boDelete && files.begin() != it_dir) std::for_each(std::execution::par, files.begin(), it_dir, [](fs::path const& p) { fs::remove(p); });
+      if(it_dir != files.end()) std::for_each(std::execution::par, it_dir, files.end(), [](fs::path const& p2) { ClearDir(p2, true); } );
       if (boDelete) fs::remove(p);
       };
    ClearDir(strPath, false);
    }
 
-//std::for_each(fs::directory_iterator(strPath), fs::directory_iterator(), [](auto& d) { if (fs::is_directory(d)) fs::remove_all(d.path()); });
-
 template <typename ty>
    requires std::floating_point<ty>
 inline void ReadFromDirectory(std::string const& strPath, data_vector<ty>& vData) {
-   /*
-      static const std::vector<std::function<void(std::pair<TData<ty>, Result<ty>>&, std::string_view const&)>> funcs_read_d = {
-         [](std::pair<TData<ty>, Result<ty>>& data, std::string_view const& val) { data.first.StreetNumber(val); },
-         [](std::pair<TData<ty>, Result<ty>>& data, std::string_view const& val) { data.first.ZipCode(val); },
-         [](std::pair<TData<ty>, Result<ty>>& data, std::string_view const& val) { data.first.UrbanUnit_Old(val); },
-         [](std::pair<TData<ty>, Result<ty>>& data, std::string_view const& val) { data.first.Latitude(val); },
-         [](std::pair<TData<ty>, Result<ty>>& data, std::string_view const& val) { data.first.Longitude(val); },
-         [](std::pair<TData<ty>, Result<ty>>& data, std::string_view const& val) {
-                                                  std::from_chars(val.data(), val.data() + val.size(), data.second.first); },
-         [](std::pair<TData<ty>, Result<ty>>& data, std::string_view const& val) {
-                                                  std::from_chars(val.data(), val.data() + val.size(), data.second.second); },
-         [](std::pair<TData<ty>, Result<ty>>& data, std::string_view const& val) { throw std::runtime_error("file corruped"); }
-      };
-   */
-
-   static const std::vector<std::function<void(std::pair<TData<ty>, Result<ty>>&, std::string_view const&)>> funcs_read_d = {
+   static const std::vector<std::function<void(std::pair<TData<ty>, Result<ty>>&, std::string_view)>> funcs_read_d = {
       [](std::pair<TData<ty>, Result<ty>>& data, std::string_view val) { data.first.StreetNumber(val); },
       [](std::pair<TData<ty>, Result<ty>>& data, std::string_view val) { data.first.ZipCode(val); },
       [](std::pair<TData<ty>, Result<ty>>& data, std::string_view val) { data.first.UrbanUnit_Old(val); },
@@ -340,18 +323,17 @@ inline void ReadFromDirectory(std::string const& strPath, data_vector<ty>& vData
    my_line_count::reset();
 
    std::for_each(std::execution::par, to_read.begin(), to_read.end(), [](auto& val) mutable {
-      std::ifstream ifs(std::get<0>(val).string());
-      if (ifs.is_open()) {
+      std::ifstream ifs(std::get<0>(val));
+      if (ifs.is_open()) [[likely]] {
          auto iSize = fs::file_size(std::get<0>(val));
          std::get<1>(val).resize(iSize);
          ifs.read(std::get<1>(val).data(), iSize);
          ifs.close();
-
          std::string_view test(std::get<1>(val).data(), std::get<1>(val).size());
          std::get<2>(val).reserve(std::count(test.begin(), test.end(), '\n'));
          my_lines file_data(test);
-         std::copy(file_data.begin(), file_data.end(), std::back_inserter(std::get<2>(val)));
-      }
+         std::copy(file_data.begin(), file_data.end(), std::back_inserter(std::get<2>(val)));  
+         }
       });
 
    vData.resize(my_line_count::GetCounter());
@@ -381,6 +363,8 @@ inline void ReadFromDirectory(std::string const& strPath, data_vector<ty>& vData
 }
 
 
+
+
 template <typename ty>
    requires std::floating_point<ty>
 inline void WriteToDirectory(std::string const& strPath, data_vector<ty>& vData) {
@@ -406,9 +390,11 @@ inline void WriteToDirectory(std::string const& strPath, data_vector<ty>& vData)
 
    std::sort(std::execution::par, vData.begin(), vData.end(), compare);
 
-   using tplParts = std::tuple<typename data_vector<ty>::const_iterator, typename data_vector<ty>::const_iterator, std::ostringstream>;
-   using myIterPair = std::tuple<typename data_vector<ty>::const_iterator, typename data_vector<ty>::const_iterator, fs::path>;
+   using iterPos = typename data_vector<ty>::const_iterator;
+   using tplParts = std::tuple<iterPos, iterPos, std::ostringstream>;
+   using myIterPair = std::tuple<iterPos, iterPos, fs::path>;
    std::vector<myIterPair> positions;
+   using iterPairIt = std::vector<myIterPair>::const_iterator;
    fs::path myOldPath = ""s;
    for (auto first = vData.begin(); first != vData.end();) {
       auto const& [address, result] = *first;
@@ -427,7 +413,57 @@ inline void WriteToDirectory(std::string const& strPath, data_vector<ty>& vData)
       first = last;
    }
 
+   /*
+   const size_t maxP = 16u;
+   size_t pos = 0, count = vData.size() / maxP;
+   std::vector<std::pair<std::future<bool>, tplData>> procs(maxP);
+   for (int i : std::ranges::iota_view{ 0u, maxP }) {
+      std::get<0>(procs[i].second) = vData.cbegin() + i * count;
+      std::get<1>(procs[i].second) = i < maxP - 1 ? vData.cbegin() + (i + 1) * count : vData.cend();
+      if (i < maxP - 1) std::get<2>(procs[i].second).reserve(171 * count);
+      else {
+         size_t c = std::distance(std::get<0>(procs[i].second), std::get<1>(procs[i].second));
+         std::get<2>(procs[i].second).reserve(171 * c);
+      }
+      procs[i].first = std::async(WritePart, std::get<0>(procs[i].second), std::get<1>(procs[i].second),
+         std::ref(std::get<2>(procs[i].second)));
+   }
+   */
+   /*
+   static auto constexpr WriteFile = [](fs::path const& strFile, iterPos start, iterPos end) {
+         std::string strBuffer;
+         strBuffer.reserve(std::distance(start, end) * 68);
+         std::for_each(start, end, [&strBuffer](auto const& value) {
+            auto const& [address, result] = value;
+            std::format_to(std::back_inserter(strBuffer), "{};{};{};{};{};{};{}\n",
+               address.StreetNumber(), address.ZipCode(), address.UrbanUnit_Old(),
+               my_Double_to_String_short(address.Latitude(), 9), my_Double_to_String_short(address.Longitude(), 9),
+               my_Double_to_String_short(result.first, 3), my_Double_to_String_short(result.second, 3));
+            });
+         std::ofstream(strFile).write(strBuffer.data(), strBuffer.size());
+
+      };
+    */
+   /*
+   const size_t maxP = 16u;
+   size_t pos = 0, count = positions.size() / maxP;
+   std::vector<std::thread> procs(maxP);
+   for (int i : std::ranges::iota_view{ 0u, maxP }) { 
+      auto start = positions.begin() + i * count;
+      auto end   = i < maxP - 1 ? positions.cbegin() + (i + 1) * count : positions.cend();
+
+      static auto worker = [](iterPairIt _start, iterPairIt _end) {
+                         std::for_each(_start, _end, [](auto const& val) {
+                                  WriteFile(std::get<2>(val), std::get<0>(val), std::get<1>(val));
+                                  });
+                         };
+      procs[i] = std::thread(std::bind(worker, start, end));
+      }
+   for (auto& proc : procs) proc.join();
+   */
    std::for_each(std::execution::par, positions.cbegin(), positions.cend(), [](auto const& val) {
+     // WriteFile(std::get<2>(val), std::get<0>(val), std::get<1>(val));
+    //  /*
       std::string strBuffer;
       strBuffer.reserve(std::distance(std::get<0>(val), std::get<1>(val)) * 68);
       std::for_each(std::get<0>(val), std::get<1>(val), [&strBuffer](auto const& value) {
@@ -438,7 +474,116 @@ inline void WriteToDirectory(std::string const& strPath, data_vector<ty>& vData)
             my_Double_to_String_short(result.first, 3), my_Double_to_String_short(result.second, 3));
          });
       std::ofstream(std::get<2>(val)).write(strBuffer.data(), strBuffer.size());
+     // */
       });
+   //*/
 }
 
 
+
+
+inline bool Compare_Input(fs::path const& strDirectory1, fs::path const& strDirectory2) {
+ 
+   static auto compare_files = [](fs::path const& file, std::vector<my_line> const& lines1, std::vector<my_line> const& lines2) {
+      for (auto [i, z1, z2] = std::make_tuple(1, lines1.begin(), lines2.begin()); z1 != lines1.end() && z2 != lines2.end(); ++i, ++z1, ++z2) {
+         if (z1->view.compare(z2->view) != 0) [[unlikely]] {
+            std::cout << std::format("difference in file {} at line {}\n{}\n{}\n", file.string(), i, z1->view, z2->view);
+            return false;
+            }
+         }
+      return true;
+      };
+
+   // check files in root
+   bool boRetVal = true;
+   std::vector<fs::path> files = { "berlin_infos.dat", "berlin_spots.txt" };
+   for(auto const& file : files) {
+      std::string strBuffer1, strBuffer2;
+      auto view1 = GetContent(strDirectory1 / file, strBuffer1);
+      auto view2 = GetContent(strDirectory2 / file, strBuffer2);
+      size_t size = std::ranges::count(view1, '\n');
+      std::vector<my_line> lines1;
+      lines1.reserve(size);
+      my_lines file_data1(view1);
+      std::ranges::copy(file_data1, std::back_inserter(lines1));
+
+      std::vector<my_line> lines2;
+      lines2.reserve(size);
+      my_lines file_data2(view2);
+      std::ranges::copy(file_data2, std::back_inserter(lines2));
+
+      if (!compare_files(file, lines1, lines2)) boRetVal = false;
+
+      }
+   return boRetVal;
+   }
+
+inline bool Compare_Output(fs::path const& strDirectory1, fs::path const& strDirectory2) {
+   static auto find_directories = [](fs::path const& p) {
+      std::vector<fs::path> paths;
+
+      std::ranges::copy(fs::directory_iterator{ p } |
+         std::views::filter([](fs::directory_entry const& entry) { return entry.is_directory(); }) |
+         std::views::transform([](fs::directory_entry const& entry) { return entry.path().filename();  }),
+         std::back_inserter(paths));
+
+      return paths;
+   };
+
+   static auto compare_files = [](fs::path const& file, std::vector<my_line> const& lines1, std::vector<my_line> const& lines2) {
+      for (auto [i, z1, z2] = std::make_tuple(1, lines1.begin(), lines2.begin()); z1 != lines1.end() && z2 != lines2.end(); ++i, ++z1, ++z2) {
+         if (z1->view.compare(z2->view) != 0) [[unlikely]] {
+            std::cout << std::format("difference in file {} at line {}\n{}\n{}\n", file.string(), i, z1->view, z2->view);
+            return false;
+         }
+      }
+      return true;
+   };
+
+
+   bool boRetVal = true;
+   std::vector<fs::path> files = { "testausgabe.txt", "testausgabe_alle.txt" };
+   for (auto const& file : files) {
+      std::string strBuffer1, strBuffer2;
+      auto view1 = GetContent(strDirectory1 / file, strBuffer1);
+      auto view2 = GetContent(strDirectory2 / file, strBuffer2);
+      size_t size = std::ranges::count(view1, '\n');
+      std::vector<my_line> lines1;
+      lines1.reserve(size);
+      my_lines file_data1(view1);
+      std::ranges::copy(file_data1, std::back_inserter(lines1));
+
+      std::vector<my_line> lines2;
+      lines2.reserve(size);
+      my_lines file_data2(view2);
+      std::ranges::copy(file_data2, std::back_inserter(lines2));
+
+      if (!compare_files(file, lines1, lines2)) boRetVal = false;
+
+      }
+
+   auto directories1 = find_directories(strDirectory1);
+   auto directories2 = find_directories(strDirectory2);
+
+   std::ranges::sort(directories1);
+   std::ranges::sort(directories2);
+
+   std::vector<fs::path> vDirectories;
+   std::ranges::set_intersection(directories1, directories2, std::back_inserter(vDirectories));
+
+   std::ranges::sort(vDirectories);
+
+   if(directories1.size() > vDirectories.size() || directories2.size() > vDirectories.size()) {
+      std::cout << std::format("directories in root {} and {} are incompatible\n", strDirectory1.string(), strDirectory2.string());
+      for(auto const& dir : { std::make_pair(directories1, strDirectory1), std::make_pair(directories2, strDirectory2) }) {
+         if(dir.first.size() > vDirectories.size()) {
+            std::cout << std::format("directories only in {}\n", dir.second.string());
+            std::ranges::set_difference(dir.first, vDirectories, std::ostream_iterator<fs::path>(std::cout, "\n"));
+            }
+         }
+      boRetVal = false;
+      }
+   // Compare 
+   //std::ranges::for_each(vDirectories, [&strDirectory1, &strDirectory2])(auto const& d) { Compare(strDirectory1 / d, strDirectory2 / d); });
+   return boRetVal;
+   }
