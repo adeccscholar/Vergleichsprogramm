@@ -4,8 +4,23 @@
 #include <optional>
 #include <iterator>
 #include <atomic>
+#include <fstream>
+#include <stdexcept>
+#include <filesystem>
 
 using namespace std::literals;
+
+// nur nutzen, wenn nicht parallel
+inline std::string_view GetContent(std::filesystem::path const& strFile, std::string& strBuffer) {
+   std::ifstream ifs(strFile, std::ifstream::in | std::ifstream::binary);
+   if (!ifs.is_open()) [[unlikely]] throw std::runtime_error("file \""s + strFile.string() + "\" can't opened"s);
+   else {
+      const auto iSize = std::filesystem::file_size(strFile);
+     strBuffer.resize(iSize);
+     ifs.read(strBuffer.data(), iSize);
+     return { strBuffer.data(), strBuffer.size() };
+     }
+}
 
 struct my_line_iterator {
    using iterator_category = std::input_iterator_tag;

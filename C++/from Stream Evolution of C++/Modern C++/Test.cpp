@@ -11,6 +11,7 @@
 
 
 #include "Tool_Helper.h"
+#include "MyCheck.h"
 #include "MyProcess.h"
 #include "MyTestStatistcs.h"
 
