@@ -101,8 +101,7 @@ inline bool Compare_Input(fs::path const& strDirectory1, fs::path const& strDire
 
    // check files in root
    bool boRetVal = true;
-   std::vector<fs::path> files = { "berlin_infos.dat", "berlin_spots.txt" };
-   for (auto const& file : files) {
+   for (auto const& file : { "berlin_infos.dat", "berlin_spots.txt" }) {
       std::string strBuffer1, strBuffer2;
       auto view1 = GetContent(strDirectory1 / file, strBuffer1);
       auto view2 = GetContent(strDirectory2 / file, strBuffer2);
@@ -120,6 +119,7 @@ inline bool Compare_Input(fs::path const& strDirectory1, fs::path const& strDire
       if (!compare_files(file, lines1, lines2)) boRetVal = false;
 
    }
+
    return boRetVal;
 }
 
@@ -147,8 +147,7 @@ inline bool Compare_Output(fs::path const& strDirectory1, fs::path const& strDir
 
 
    bool boRetVal = true;
-   std::vector<fs::path> files = { "testausgabe.txt", "testausgabe_alle.txt" };
-   for (auto const& file : files) {
+   for (auto const& file : { "testausgabe.txt", "testausgabe_alle.txt" }) {
       std::string strBuffer1, strBuffer2;
       auto lines1 = my_lines{ GetContent(strDirectory1 / file, strBuffer1) } | std::ranges::to<std::vector>();
       auto lines2 = my_lines{ GetContent(strDirectory2 / file, strBuffer2) } | std::ranges::to<std::vector>();

@@ -59,46 +59,86 @@ void Rechentest(std::string const& strDirectory, int iCount = 1) {
       return std::make_optional<size_t>(std::distance(vData.begin(), it));
       };
 
+   static size_func empty_size = []() -> mySizeRet { std::optional<size_t> ret{ }; return ret; };
+
    static std::vector<std::tuple<std::string, std::string, std::string, call_func, size_func>> test_funcs = {
+      { "delete file"s, "delete output file "s, "output files deleted"s,
+            [&strDirectory]() {
+               for (fs::path dir{ strDirectory }; auto const& file : { "testausgabe.txt", "testausgabe_alle.txt" }) {
+                  fs::remove(dir / file);
+                  }
+               },
+         empty_size },
       { "read file"s, "read file "s + strFilename, "datasets read from file"s,
             std::bind(Reading<double>, std::ref(vData), std::cref(strFilename)),
-            addresses_size },
+            addresses_size 
+      },
+      // -----------------------------------------------------------------------------
       { "calc point"s, "calculate data"s, "datasets calculated for point"s,
-            [&vData, &point]() { Calculate(point, vData.begin(), vData.end()); },
-            addresses_size },
+            [&vData, &point]() { CalculateRange(point, vData.begin(), vData.end()); },
+            //std::bind(CalculateRange<double>, std::cref(point), vData.begin(), vData.end()),
+            addresses_size 
+      },
+      // -----------------------------------------------------------------------------
       { "sort din"s, "sort data"s, "datasets sorted in vector"s,
             std::bind(Sorting<double>, std::ref(vData)),
-            addresses_size },
+            addresses_size 
+      },
+      // -----------------------------------------------------------------------------
       { "write all"s, "write data to "s + strOutput_all, "datasets wrote to file"s,
             std::bind(Writing<double>, std::cref(vData), std::cref(strOutput_all)),
-            addresses_size },
+            addresses_size 
+      // -----------------------------------------------------------------------------
+      },
       { "delete dir"s, "delete directory "s + strDirectory, "directories deleted"s,
             std::bind(DeleteDirectories, std::cref(strDirectory)),
-            []() { std::optional<size_t> retval = { };  return retval; } },
+            empty_size 
+      },
+      // -----------------------------------------------------------------------------
       { "write dir"s, "write data to directory "s + strDirectory, "datasets wrote to directories"s,
             std::bind(WriteToDirectory<double>, std::cref(strDirectory), std::ref(vData)),
-            addresses_size },
+            addresses_size 
+      },
+      // -----------------------------------------------------------------------------
       { "del data"s, "delete data "s, "datasets still in alive"s,
-            [&vData]() { vData.clear(); vData.shrink_to_fit(); },
-            addresses_capacity },
+            [&vData]() { 
+                vData.clear(); 
+                vData.shrink_to_fit(); 
+                },
+            addresses_capacity 
+      },
+      // -----------------------------------------------------------------------------
       { "read dir"s, "read data from directory "s + strDirectory, "datasets read from directories"s,
             std::bind(ReadFromDirectory<double>, std::cref(strDirectory), std::ref(vData)),
-            addresses_size },
+            addresses_size 
+      },
+      // -----------------------------------------------------------------------------
       { "split data"s, "partitioning data to "s, "datasets partitioned in vector"s,
-            [&vData, &it]() { it = std::partition(std::execution::par, vData.begin(), vData.end(), [](auto const& val) {
-                              return val.second.first < 1000.0; });  },
-            value_size },
+            [&vData, &it]() {
+               it = std::partition(std::execution::par, vData.begin(), vData.end(), 
+                         [](auto const& val) { return val.second.first < 1000.0; });
+               },
+            value_size
+      },
+      // -----------------------------------------------------------------------------
       { "sort part"s, "sort partitioned data "s, "partitioned datasets sorted"s,
-            [&vData, &it]() { std::sort(std::execution::par, vData.begin(), it, [](auto const& lhs, auto const& rhs) {
-                                    if (auto cmp = lhs.second.first <=> rhs.second.first; cmp != 0) [[likely]] return cmp > 0;
-                                    else if (auto cmp = lhs.second.second <=> rhs.second.second; cmp != 0) return cmp < 0; 
-                                    else if (auto cmp = lhs.first.Street() <=> rhs.first.Street(); cmp != 0) return cmp < 0;
-                                    else return lhs.first.StreetNumber() < rhs.first.StreetNumber();
-                                    });
-                             }, value_size },
+            [&vData, &it]() {
+                std::sort(std::execution::par, vData.begin(), it, [](auto const& lhs, auto const& rhs) {
+                   if (auto cmp = lhs.second.first <=> rhs.second.first; cmp != 0) [[likely]] return cmp > 0;
+                   else if (auto cmp = lhs.second.second <=> rhs.second.second; cmp != 0) return cmp < 0;
+                   else if (auto cmp = lhs.first.Street() <=> rhs.first.Street(); cmp != 0) return cmp < 0;
+                   else return lhs.first.StreetNumber() < rhs.first.StreetNumber();
+                   });
+                },
+            value_size 
+      },
+      // -----------------------------------------------------------------------------
       { "write part"s, "write this data to "s + strOutput, "datasets wrote to file"s,
-            [&vData, &it, &strOutput]() { WritingPart<double>(vData.begin(), it, strOutput); } ,
-            value_size }
+            [&vData, &it, &strOutput]() { 
+                WritingPart<double>(vData.begin(), it, strOutput); 
+                },
+            value_size 
+            }
       };
      
    TTestData<double> test;
@@ -137,6 +177,7 @@ void Rechentest(std::string const& strDirectory, int iCount = 1) {
       return;
       }
    
+
    for(int step : std::ranges::iota_view{ 0, test.iTestCases }) {
       std::cout << std::format("{2:} start run {0:} of {1:}\n", step + 1, iCount, get_current_time_and_date());
       //std::cout << get_current_time_and_date() << " start run " << step + 1 << " of " << iCount << std::endl;

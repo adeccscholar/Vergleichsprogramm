@@ -96,7 +96,8 @@ using func_vector_vw = std::vector<std::function<void(TData<ty>&, std::string_vi
 
 template< typename ty>
 requires std::floating_point<ty>
-inline void Calculate(Location<ty> const& pointA, typename data_vector<ty>::iterator begin, typename data_vector<ty>::iterator end) {
+inline void CalculateRange(Location<ty> const& pointA, typename data_vector<ty>::iterator begin, typename data_vector<ty>::iterator end) {
+//inline void CalculateRange(Location<ty> const& pointA, it_type begin, it_type end) {
    static constexpr auto my_round = [](ty const& val) {
       return std::round(val * 1000.0) / 1000.0;
    };

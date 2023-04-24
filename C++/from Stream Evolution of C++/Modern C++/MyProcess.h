@@ -29,6 +29,8 @@ inline void Log(std::string const& msg, std::exception const& ex, std::source_lo
    std::cerr << std::format("{}: {} in file {} at line {}\n", msg, ex.what(), loc.file_name(), loc.line());
    }
 
+
+
 template <typename ty>
    requires std::floating_point<ty>
 inline void Reading(data_vector<ty>& vData, fs::path const& strFile) {
@@ -43,7 +45,7 @@ inline void Reading(data_vector<ty>& vData, fs::path const& strFile) {
       [](TData<ty>& data, std::string_view val) { data.Latitude(val); },
       [](TData<ty>& data, std::string_view val) { data.Longitude(val); },
       [](TData<ty>&, std::string_view) { throw std::runtime_error("unexpected number of elements.");  }
-   };
+      };
 
 
    std::string strBuffer;
@@ -51,15 +53,20 @@ inline void Reading(data_vector<ty>& vData, fs::path const& strFile) {
    my_line_count::reset();
    auto lines = my_lines { GetContent(strFile, strBuffer) } | std::ranges::to<std::vector<my_line_count>>();
    vData.resize(lines.size());
-   std::for_each(std::execution::par,
-      lines.begin(), lines.end(), [&vData](auto const& val) {
-         size_t iPos = 0u, iEnd;
-         int iCount = 0;  // funcs_vw
-         do {
-            iEnd = val.view.find(';', iPos);
-            funcs_vw[iCount++](vData[val.index].first, val.view.substr(iPos, iEnd - iPos));
-            if (iEnd != std::string_view::npos) iPos = iEnd + 1;
-         } while (iEnd != std::string_view::npos);
+
+   // Stream, C++23 Anpassen
+   //for(auto const& [iCount, data] : std::ranges::split_view(val.view, delim) | std::views::enumerate | std::ranges::to<std::map>) {
+
+
+   static constexpr std::string_view delim{ ";" };
+   static constexpr auto my_enumerate = [](std::ranges::viewable_range auto&& r) {
+      return std::ranges::zip_view(std::views::iota(0), std::forward<decltype(r)>(r)); 
+      };
+
+   std::for_each(std::execution::par, lines.begin(), lines.end(), [&vData](auto const& val) {
+         for(auto const& [iCount, data] : my_enumerate(std::ranges::split_view(val.view, delim))) {
+            funcs_vw[iCount](vData[val.index].first, std::string_view{ data.begin(), data.end() });
+            }
       });
    return;
    }
@@ -72,7 +79,8 @@ inline void WritingPart(auto begin, auto end, std::string const& strFile) {
    using tplData = std::tuple<itDataType, itDataType, std::string>;
 
    static auto constexpr WritePart = [](itDataType begin, itDataType end, std::string& strBuffer) {
-      std::for_each(std::execution::seq, begin, end, [&strBuffer](auto const& val) {
+      std::ranges::for_each(std::ranges::subrange { begin, end }, [&strBuffer](auto const& val) {
+      //std::for_each(std::execution::seq, begin, end, [&strBuffer](auto const& val) {
          std::string fill1(70 - val.first.City().length() - val.first.District().length(), ' ');
          std::string fill2(64 - val.first.Street().length() - val.first.StreetNumber().length(), ' ');
          std::format_to(std::back_inserter(strBuffer), "{} {} - {}, {}{} {}{}={}m / {}°\n",
@@ -106,7 +114,7 @@ inline void WritingPart(auto begin, auto end, std::string const& strFile) {
 
    }
 
-
+/// !!!!!
 template <typename ty>
 requires std::floating_point<ty>
 inline void Writing(data_vector<ty> const& vData, std::string const& strFile) {
@@ -117,12 +125,10 @@ inline void Writing(data_vector<ty> const& vData, std::string const& strFile) {
 
    static auto constexpr WritePart = [](itDataType begin, itDataType end, std::string& strBuffer) {
       std::for_each(std::execution::seq, begin, end, [&strBuffer](auto const& val) {
-         std::string fill1(70 - val.first.City().length() - val.first.District().length(), ' ');
-         std::string fill2(64 - val.first.Street().length() - val.first.StreetNumber().length(), ' ');
-         std::format_to(std::back_inserter(strBuffer), "{} {} - {}, {}{} {}{}={}m / {}°\n",
-            val.first.ZipCode(), val.first.City(), val.first.District(), fill1,
-            val.first.Street(), val.first.StreetNumber(), fill2, my_Double_to_String_G(val.second.first, 3),
-            my_Double_to_String_G(val.second.second, 3));
+         std::format_to(std::back_inserter(strBuffer), "{0:s} {1:s} - {2:s}{3:<{4}s} {5:s} {6:<{7}s}={8:s}m / {9:s}°\n",
+            val.first.ZipCode(), val.first.City(), val.first.District(), ","s, 71 - val.first.City().size() - val.first.District().size(),
+            val.first.Street(), val.first.StreetNumber(), 64 - val.first.Street().size(),
+            my_Double_to_String_G(val.second.first, 3), my_Double_to_String_G(val.second.second, 3));
          });
       return true;
    };
@@ -148,6 +154,7 @@ inline void Writing(data_vector<ty> const& vData, std::string const& strFile) {
       of << std::get<2>(part.second);
    }
 }
+
 
 template <typename ty>
    requires std::floating_point<ty>
@@ -178,8 +185,8 @@ inline void Sorting(data_vector<ty>& vData) {
          else if (!cleft && cright)  return left <=> normalize(right, cright_pos);
          else if (cleft && !cright)  return normalize(left, cleft_pos) <=> right;
          else [[unlikely]] return ret;
-      }
-   };
+         }
+      };
 
    static constexpr auto compare_streetnumber2 = [](std::string const& aSNr, std::string const& bSNr) noexcept {
       unsigned int a_Nr, b_Nr;
@@ -211,9 +218,9 @@ inline void DeleteDirectories_with_ranges(std::string const& strPath) {
 
 inline void DeleteDirectories(std::string const& strPath) {
    static std::function<void(fs::path const&, bool)> ClearDir = [](fs::path const& p, bool boDelete) {
-      auto files = fs::directory_iterator{ p } | std::ranges::to<std::vector>();
+      auto files = fs::directory_iterator { p } | std::ranges::to<std::vector>();
       auto it_dir = std::partition(std::execution::par, files.begin(), files.end(), [](fs::path const& p) { return !fs::is_directory(p); });
-      if (boDelete && files.begin() != it_dir) std::for_each(std::execution::par, files.begin(), it_dir, [](fs::path const& p) { fs::remove(p); });
+      if (boDelete) std::for_each(std::execution::par, files.begin(), it_dir, [](fs::path const& p) { fs::remove(p); });
       if(it_dir != files.end()) std::for_each(std::execution::par, it_dir, files.end(), [](fs::path const& p2) { ClearDir(p2, true); } );
       if (boDelete) fs::remove(p);
       };
@@ -270,27 +277,28 @@ inline void ReadFromDirectory(std::string const& strPath, data_vector<ty>& vData
    std::for_each(std::execution::par, to_read.begin(), to_read.end(), [](auto& val) mutable {
       auto test = GetContent(std::get<0>(val), std::get<1>(val));
       std::get<2>(val).reserve(std::ranges::count(test, '\n'));
-      std::ranges::copy(my_lines{ test }, std::back_inserter(std::get<2>(val)));
+      std::ranges::copy(my_lines { test }, std::back_inserter(std::get<2>(val)));
       });
 
    vData.resize(my_line_count::GetCounter());
 
    try {
+      static constexpr std::string_view delim{ ";" };
+      static constexpr auto my_enumerate = [](std::ranges::viewable_range auto&& r) {
+         return std::ranges::zip_view(std::views::iota(0), std::forward<decltype(r)>(r));
+         };
+
       std::for_each(std::execution::par, to_read.begin(), to_read.end(), [&vData](auto& val) {
          auto& [strCity, strUnit, strDistrict, strStreet] = std::get<3>(val);
          std::for_each(std::execution::par, std::get<2>(val).begin(), std::get<2>(val).end(), [&vData, &strCity, &strUnit, &strDistrict, &strStreet](auto& val_) mutable {
-            auto& data = vData[val_.index];
-            data.first.City(strCity);
-            data.first.UrbanUnit(strUnit);
-            data.first.District(strDistrict);
-            data.first.Street(strStreet);
-
-            size_t iPos = 0, iEnd, iCount = 0;
-            do {
-               iEnd = val_.view.find(";", iPos);
-               funcs_read_d[iCount++](data, val_.view.substr(iPos, iEnd - iPos));
-               if (iEnd != std::string_view::npos) iPos = iEnd + 1;
-            } while (iEnd != std::string_view::npos);
+            auto& address = vData[val_.index];
+            address.first.City(strCity);
+            address.first.UrbanUnit(strUnit);
+            address.first.District(strDistrict);
+            address.first.Street(strStreet);
+            for (auto const& [iCount, data] : my_enumerate(std::ranges::split_view(val_.view, delim))) {
+               funcs_read_d[iCount](address, std::string_view{ data.begin(), data.end() });
+               }
             });
          });
    }
@@ -311,7 +319,7 @@ inline void WriteToDirectory(std::string const& strPath, data_vector<ty>& vData)
       auto [pt2, ec2] = std::from_chars(bSNr.data(), bSNr.data() + bSNr.size(), iNbr2);
       if (auto cmp = iNbr1 <=> iNbr2; cmp != 0) return cmp < 0;
       else {
-         return std::string(pt1) < std::string(pt2); //return lower(a_ptr) < lower(b_ptr);
+         return std::tolower(*pt1) < std::tolower(*pt2);
       }
    };
 
@@ -350,57 +358,7 @@ inline void WriteToDirectory(std::string const& strPath, data_vector<ty>& vData)
       first = last;
    }
 
-   /*
-   const size_t maxP = 16u;
-   size_t pos = 0, count = vData.size() / maxP;
-   std::vector<std::pair<std::future<bool>, tplData>> procs(maxP);
-   for (int i : std::ranges::iota_view{ 0u, maxP }) {
-      std::get<0>(procs[i].second) = vData.cbegin() + i * count;
-      std::get<1>(procs[i].second) = i < maxP - 1 ? vData.cbegin() + (i + 1) * count : vData.cend();
-      if (i < maxP - 1) std::get<2>(procs[i].second).reserve(171 * count);
-      else {
-         size_t c = std::distance(std::get<0>(procs[i].second), std::get<1>(procs[i].second));
-         std::get<2>(procs[i].second).reserve(171 * c);
-      }
-      procs[i].first = std::async(WritePart, std::get<0>(procs[i].second), std::get<1>(procs[i].second),
-         std::ref(std::get<2>(procs[i].second)));
-   }
-   */
-   /*
-   static auto constexpr WriteFile = [](fs::path const& strFile, iterPos start, iterPos end) {
-         std::string strBuffer;
-         strBuffer.reserve(std::distance(start, end) * 68);
-         std::for_each(start, end, [&strBuffer](auto const& value) {
-            auto const& [address, result] = value;
-            std::format_to(std::back_inserter(strBuffer), "{};{};{};{};{};{};{}\n",
-               address.StreetNumber(), address.ZipCode(), address.UrbanUnit_Old(),
-               my_Double_to_String_short(address.Latitude(), 9), my_Double_to_String_short(address.Longitude(), 9),
-               my_Double_to_String_short(result.first, 3), my_Double_to_String_short(result.second, 3));
-            });
-         std::ofstream(strFile).write(strBuffer.data(), strBuffer.size());
-
-      };
-    */
-   /*
-   const size_t maxP = 16u;
-   size_t pos = 0, count = positions.size() / maxP;
-   std::vector<std::thread> procs(maxP);
-   for (int i : std::ranges::iota_view{ 0u, maxP }) { 
-      auto start = positions.begin() + i * count;
-      auto end   = i < maxP - 1 ? positions.cbegin() + (i + 1) * count : positions.cend();
-
-      static auto worker = [](iterPairIt _start, iterPairIt _end) {
-                         std::for_each(_start, _end, [](auto const& val) {
-                                  WriteFile(std::get<2>(val), std::get<0>(val), std::get<1>(val));
-                                  });
-                         };
-      procs[i] = std::thread(std::bind(worker, start, end));
-      }
-   for (auto& proc : procs) proc.join();
-   */
    std::for_each(std::execution::par, positions.cbegin(), positions.cend(), [](auto const& val) {
-     // WriteFile(std::get<2>(val), std::get<0>(val), std::get<1>(val));
-    //  /*
       std::string strBuffer;
       strBuffer.reserve(std::distance(std::get<0>(val), std::get<1>(val)) * 68);
       std::for_each(std::get<0>(val), std::get<1>(val), [&strBuffer](auto const& value) {
@@ -411,10 +369,8 @@ inline void WriteToDirectory(std::string const& strPath, data_vector<ty>& vData)
             my_Double_to_String_short(result.first, 3), my_Double_to_String_short(result.second, 3));
          });
       std::ofstream(std::get<2>(val)).write(strBuffer.data(), strBuffer.size());
-     // */
       });
-   //*/
-}
+   }
 
 
 
