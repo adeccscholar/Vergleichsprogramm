@@ -25,17 +25,19 @@ namespace fs = std::filesystem;
 inline void Compare(fs::path const& strDirectory1, fs::path const& strDirectory2) {
    static auto constexpr is_directory = [](auto const& entry) { return entry.is_directory();  };
 
-   static std::function<void(fs::path const&, std::vector<fs::path>&)> build_dirs = [](fs::path const& p, std::vector<fs::path>& dirs) {
-      for(auto const& dir: fs::directory_iterator { p } | std::ranges::views::filter(is_directory)) {
-         dirs.emplace_back(dir);
-         build_dirs(dir, dirs);
+   static std::function<void(fs::path const&, fs::path const&, std::vector<fs::path>&)> build_dirs = [](fs::path const& r, fs::path const& p, std::vector<fs::path>& dirs) {
+      for (auto const& dir : fs::directory_iterator{ p } | std::ranges::views::filter(is_directory)) {
+         dirs.emplace_back(fs::relative(dir, r));
+         build_dirs(r, dir, dirs);
          }
       };
 
+
    static auto build_files = [](fs::path const& p) {
-      return fs::directory_iterator{ p } | std::ranges::views::filter([](fs::directory_entry const& entry) { return entry.is_regular_file(); }) |
-         std::views::transform([](fs::directory_entry const& entry) { return entry.path().filename(); }) |
-         std::ranges::to<std::vector>();
+      return fs::directory_iterator{ p } 
+          | std::ranges::views::filter([](fs::directory_entry const& entry) { return entry.is_regular_file(); }) 
+          | std::views::transform([](fs::directory_entry const& entry) { return entry.path().filename(); }) 
+          | std::ranges::to<std::vector>();
       };
 
    static auto Compare = [](fs::path const& d1, fs::path const& d2, fs::path const& subdir) {
@@ -61,8 +63,9 @@ inline void Compare(fs::path const& strDirectory1, fs::path const& strDirectory2
          std::cout << "following files in directory " << d2 << " not in " << d1 << std::endl;
          //std::ranges::for_each(vDiffFiles, [](auto const& f) { std::cout << f << std::endl; });
          std::ranges::copy(vDiffFiles, std::ostream_iterator<fs::path>(std::cout, "\n"));
-
-         static auto compare_files = [](fs::path const& file, fs::path const& dir, std::vector<my_line> const& lines1, std::vector<my_line> const& lines2) {
+         }
+         
+      static auto compare_files = [](fs::path const& file, fs::path const& dir, std::vector<my_line> const& lines1, std::vector<my_line> const& lines2) {
             for (auto [i, z1, z2] = std::make_tuple(1, lines1.begin(), lines2.begin()); z1 != lines1.end() && z2 != lines2.end(); ++i, ++z1, ++z2) {
                if (z1->view.compare(z2->view) != 0) [[unlikely]] {
                   std::cout << "difference in directory "s << dir << " in file "s << file << " line "s << i << std::endl
@@ -73,17 +76,36 @@ inline void Compare(fs::path const& strDirectory1, fs::path const& strDirectory2
                }
             return true;
             };
+
       for(auto const& file : vFiles) {
          std::string buffer1, buffer2;
          auto lines1 = my_lines{ GetContent(d1 / subdir / file, buffer1) } | std::ranges::to<std::vector<my_line>>();
          auto lines2 = my_lines{ GetContent(d2 / subdir / file, buffer2) } | std::ranges::to<std::vector<my_line>>();
          compare_files(file, subdir, lines1, lines2);
+         }
+      };
+
+   std::vector<fs::path> vDirs1, vDirs2, vDirs, vDiff1, vDiff2;
+
+   build_dirs(strDirectory1, strDirectory1, vDirs1);
+   build_dirs(strDirectory2, strDirectory2, vDirs2);
+   std::ranges::sort(vDirs1);
+   std::ranges::sort(vDirs2);
+   std::ranges::set_intersection(vDirs1, vDirs2, std::back_inserter(vDirs));
+
+   std::ranges::set_difference(vDirs1, vDirs2, std::back_inserter(vDiff1));
+   std::ranges::set_difference(vDirs2, vDirs1, std::back_inserter(vDiff2));
+
+   if (vDiff1.size() > 0) {
+      std::cout << std::format("Directories which only exists in \"{0:s}\"\n", strDirectory1.string());
+      std::ranges::copy(vDiff1, std::ostream_iterator<fs::path>(std::cout, "\n"));
+      }
+   if (vDiff2.size() > 0) {
+      std::cout << std::format("Directories which only exists in \"{}\"\n", strDirectory2.string());
+      std::ranges::copy(vDiff2, std::ostream_iterator<fs::path>(std::cout, "\n"));
       }
 
-      }
-
-   };
-
+   for (auto const& dir : vDirs) Compare(strDirectory1, strDirectory2, dir);
    }
 
 
