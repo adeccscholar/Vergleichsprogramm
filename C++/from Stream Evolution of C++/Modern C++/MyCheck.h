@@ -61,7 +61,6 @@ inline void Compare(fs::path const& strDirectory1, fs::path const& strDirectory2
          std::vector<fs::path> vDiffFiles;
          std::ranges::set_difference(files2, vFiles, std::back_inserter(vDiffFiles));
          std::cout << "following files in directory " << d2 << " not in " << d1 << std::endl;
-         //std::ranges::for_each(vDiffFiles, [](auto const& f) { std::cout << f << std::endl; });
          std::ranges::copy(vDiffFiles, std::ostream_iterator<fs::path>(std::cout, "\n"));
          }
          

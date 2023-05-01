@@ -4,6 +4,7 @@
 
 #include "MyData.h"
 #include "MyFileIterator.h"
+#include "MyConvert.h"
 
 #include <iostream>
 #include <fstream>

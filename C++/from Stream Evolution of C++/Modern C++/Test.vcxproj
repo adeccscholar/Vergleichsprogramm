@@ -145,11 +145,13 @@
   <ItemGroup>
     <ClInclude Include="MyAddress.h" />
     <ClInclude Include="MyCheck.h" />
+    <ClInclude Include="MyConvert.h" />
     <ClInclude Include="MyData.h" />
     <ClInclude Include="MyFileIterator.h" />
     <ClInclude Include="MyLocation.h" />
     <ClInclude Include="MyProcess.h" />
     <ClInclude Include="MyTestStatistcs.h" />
+    <ClInclude Include="MyType_Traits.h" />
     <ClInclude Include="Tool_Helper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
