@@ -74,7 +74,7 @@ inline void Reading(data_vector<ty>& vData, fs::path const& strFile) {
 
 template <typename ty>
    requires std::floating_point<ty>
-inline void WritingPart(auto begin, auto end, std::string const& strFile) {
+inline void WritingPart(auto begin, auto end, fs::path const& strFile) {
 
    using itDataType = typename data_vector<ty>::const_iterator;
    using tplData = std::tuple<itDataType, itDataType, std::string>;
@@ -118,7 +118,7 @@ inline void WritingPart(auto begin, auto end, std::string const& strFile) {
 /// !!!!!
 template <typename ty>
 requires std::floating_point<ty>
-inline void Writing(data_vector<ty> const& vData, std::string const& strFile) {
+inline void Writing(data_vector<ty> const& vData, fs::path const& strFile) {
    //WritingPart(vData.cbegin(), vData.cend(), strFile);
 
    using itDataType = data_vector<ty>::const_iterator;
@@ -217,7 +217,7 @@ inline void DeleteDirectories_with_ranges(std::string const& strPath) {
    for (auto const& dir : fs::directory_iterator(strPath) | std::views::filter(is_directory)) fs::remove_all(dir.path());
    }
 
-inline void DeleteDirectories(std::string const& strPath) {
+inline void DeleteDirectories(fs::path const& strPath) {
    static std::function<void(fs::path const&, bool)> ClearDir = [](fs::path const& p, bool boDelete) {
       auto files = fs::directory_iterator { p } | std::ranges::to<std::vector>();
       auto it_dir = std::partition(std::execution::par, files.begin(), files.end(), [](fs::path const& p) { return !fs::is_directory(p); });
@@ -230,7 +230,7 @@ inline void DeleteDirectories(std::string const& strPath) {
 
 template <typename ty>
    requires std::floating_point<ty>
-inline void ReadFromDirectory(std::string const& strPath, data_vector<ty>& vData) {
+inline void ReadFromDirectory(fs::path const& strPath, data_vector<ty>& vData) {
    static const std::vector<std::function<void(std::pair<TData<ty>, Result<ty>>&, std::string_view)>> funcs_read_d = {
       [](std::pair<TData<ty>, Result<ty>>& data, std::string_view val) { data.first.StreetNumber(val); },
       [](std::pair<TData<ty>, Result<ty>>& data, std::string_view val) { data.first.ZipCode(val); },
@@ -313,7 +313,7 @@ inline void ReadFromDirectory(std::string const& strPath, data_vector<ty>& vData
 
 template <typename ty>
    requires std::floating_point<ty>
-inline void WriteToDirectory(std::string const& strPath, data_vector<ty>& vData) {
+inline void WriteToDirectory(fs::path const& strPath, data_vector<ty>& vData) {
    static constexpr auto compare_streetnumber2 = [](std::string const& aSNr, std::string const& bSNr) noexcept {
       int iNbr1, iNbr2;
       auto [pt1, ec1] = std::from_chars(aSNr.data(), aSNr.data() + aSNr.size(), iNbr1);

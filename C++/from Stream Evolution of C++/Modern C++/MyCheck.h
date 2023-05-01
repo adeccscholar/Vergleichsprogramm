@@ -22,67 +22,68 @@
 using namespace std::literals;
 namespace fs = std::filesystem;
 
+
+// anstatt des internen Lambda- Ausdrucks
+inline auto build_files(fs::path const& p) {
+   return fs::directory_iterator{ p }
+      | std::ranges::views::filter([](fs::directory_entry const& entry) { return entry.is_regular_file(); })
+      | std::views::transform([](fs::directory_entry const& entry) { return entry.path().filename(); })
+      | std::ranges::to<std::vector>();
+   }
+
+// anstatt des internen Lambda- Ausdrucks
+inline bool compare_files(fs::path const& file, fs::path const& dir, std::vector<my_line> const& lines1, std::vector<my_line> const& lines2) {
+   for (auto [i, z1, z2] = std::make_tuple(1, lines1.begin(), lines2.begin()); z1 != lines1.end() && z2 != lines2.end(); ++i, ++z1, ++z2) {
+      if (z1->view.compare(z2->view) != 0) [[unlikely]] {
+         std::cout << "difference in directory "s << dir << " in file "s << file << " line "s << i << std::endl
+            << z1->view << std::endl
+            << z2->view << std::endl;
+         return false;
+         }
+      }
+   return true;
+   }
+
+// anstatt des internen Lambda- Ausdrucks
+inline auto Compare (fs::path const& d1, fs::path const& d2, fs::path const& subdir) {
+   auto constexpr CheckDirs = [](fs::path const& dir, std::vector<fs::path> const& special, std::vector<fs::path> const& base) {
+      if(special.size() > base.size()) {
+         std::vector<fs::path> vDiff;
+         std::ranges::set_difference(special, base, std::back_inserter(vDiff));
+         std::cout << "following files are only in directory " << dir << std::endl;
+         std::ranges::copy(vDiff, std::ostream_iterator<fs::path>(std::cout, "\n"));
+         }
+      };
+
+   auto files1 = build_files(d1 / subdir);
+   auto files2 = build_files(d2 / subdir);
+
+   std::ranges::sort(files1);
+   std::ranges::sort(files2);
+   std::vector<fs::path> vFiles;
+   std::ranges::set_intersection(files1, files2, std::back_inserter(vFiles));
+   std::ranges::sort(vFiles);
+
+   CheckDirs(d1, files1, vFiles);
+   CheckDirs(d2, files2, vFiles);
+
+   for (auto const& file : vFiles) {
+      std::string buffer1, buffer2;
+      auto lines1 = my_lines{ GetContent(d1 / subdir / file, buffer1) } | std::ranges::to<std::vector<my_line>>();
+      auto lines2 = my_lines{ GetContent(d2 / subdir / file, buffer2) } | std::ranges::to<std::vector<my_line>>();
+      compare_files(file, subdir, lines1, lines2);
+      }
+   }
+
+inline void build_dirs(fs::path const& r, fs::path const& p, std::vector<fs::path>& dirs) {
+   for (auto const& dir : fs::directory_iterator{ p } | std::ranges::views::filter([](auto const& e) { return e.is_directory(); })) {
+      dirs.emplace_back(fs::relative(dir, r));
+      build_dirs(r, dir, dirs);
+      }
+   }
+
+// einige interne Lambda- Ausdrücke zu externen Methoden umgewandelt, um es verständlicher zu machen
 inline void Compare(fs::path const& strDirectory1, fs::path const& strDirectory2) {
-   static auto constexpr is_directory = [](auto const& entry) { return entry.is_directory();  };
-
-   static std::function<void(fs::path const&, fs::path const&, std::vector<fs::path>&)> build_dirs = [](fs::path const& r, fs::path const& p, std::vector<fs::path>& dirs) {
-      for (auto const& dir : fs::directory_iterator{ p } | std::ranges::views::filter(is_directory)) {
-         dirs.emplace_back(fs::relative(dir, r));
-         build_dirs(r, dir, dirs);
-         }
-      };
-
-
-   static auto build_files = [](fs::path const& p) {
-      return fs::directory_iterator{ p } 
-          | std::ranges::views::filter([](fs::directory_entry const& entry) { return entry.is_regular_file(); }) 
-          | std::views::transform([](fs::directory_entry const& entry) { return entry.path().filename(); }) 
-          | std::ranges::to<std::vector>();
-      };
-
-   static auto Compare = [](fs::path const& d1, fs::path const& d2, fs::path const& subdir) {
-      auto files1 = build_files(d1 / subdir);
-      auto files2 = build_files(d2 / subdir);
-
-      std::ranges::sort(files1);
-      std::ranges::sort(files2);
-      std::vector<fs::path> vFiles;
-      std::ranges::set_intersection(files1, files2, std::back_inserter(vFiles));
-      std::ranges::sort(vFiles);
-
-      if(files1.size() > vFiles.size()) {
-         std::vector<fs::path> vDiffFiles;
-         std::ranges::set_difference(files1, vFiles, std::back_inserter(vDiffFiles));
-         std::cout << "following files in directory " << d1 << " not in " << d2 << std::endl;
-         std::ranges::for_each(vDiffFiles, [](auto const& f) { std::cout << f << std::endl; });
-         }
-         
-      if (files2.size() > vFiles.size()) {
-         std::vector<fs::path> vDiffFiles;
-         std::ranges::set_difference(files2, vFiles, std::back_inserter(vDiffFiles));
-         std::cout << "following files in directory " << d2 << " not in " << d1 << std::endl;
-         std::ranges::copy(vDiffFiles, std::ostream_iterator<fs::path>(std::cout, "\n"));
-         }
-         
-      static auto compare_files = [](fs::path const& file, fs::path const& dir, std::vector<my_line> const& lines1, std::vector<my_line> const& lines2) {
-            for (auto [i, z1, z2] = std::make_tuple(1, lines1.begin(), lines2.begin()); z1 != lines1.end() && z2 != lines2.end(); ++i, ++z1, ++z2) {
-               if (z1->view.compare(z2->view) != 0) [[unlikely]] {
-                  std::cout << "difference in directory "s << dir << " in file "s << file << " line "s << i << std::endl
-                            << z1->view << std::endl
-                            << z2->view << std::endl;
-                  return false;
-                  }
-               }
-            return true;
-            };
-
-      for(auto const& file : vFiles) {
-         std::string buffer1, buffer2;
-         auto lines1 = my_lines{ GetContent(d1 / subdir / file, buffer1) } | std::ranges::to<std::vector<my_line>>();
-         auto lines2 = my_lines{ GetContent(d2 / subdir / file, buffer2) } | std::ranges::to<std::vector<my_line>>();
-         compare_files(file, subdir, lines1, lines2);
-         }
-      };
 
    std::vector<fs::path> vDirs1, vDirs2, vDirs, vDiff1, vDiff2;
 
@@ -96,11 +97,11 @@ inline void Compare(fs::path const& strDirectory1, fs::path const& strDirectory2
    std::ranges::set_difference(vDirs2, vDirs1, std::back_inserter(vDiff2));
 
    if (vDiff1.size() > 0) {
-      std::cout << std::format("Directories which only exists in \"{0:s}\"\n", strDirectory1.string());
+      std::cout << std::format("list of directories which only exists in \"{0:s}\"\n", strDirectory1.string());
       std::ranges::copy(vDiff1, std::ostream_iterator<fs::path>(std::cout, "\n"));
       }
    if (vDiff2.size() > 0) {
-      std::cout << std::format("Directories which only exists in \"{}\"\n", strDirectory2.string());
+      std::cout << std::format("list of directories which only exists in \"{}\"\n", strDirectory2.string());
       std::ranges::copy(vDiff2, std::ostream_iterator<fs::path>(std::cout, "\n"));
       }
 

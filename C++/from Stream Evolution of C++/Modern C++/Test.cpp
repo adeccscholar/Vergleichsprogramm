@@ -30,7 +30,7 @@
 
 
 
-void Rechentest(std::string const& strDirectory, int iCount = 1) {
+void Rechentest(fs::path const& directory, int iCount = 1) {
    using myTimeType = std::chrono::microseconds;  // std::chrono::milliseconds
    static const double time_factor = 1000000.;    // 1000.
    static const int    time_prec   = 6;           // 3
@@ -38,9 +38,14 @@ void Rechentest(std::string const& strDirectory, int iCount = 1) {
    data_vector<double> vData;
    data_vector<double>::iterator it;
    Location<double> point    = { 52.520803, 13.40945 };
-   std::string strFilename   = strDirectory + "\\berlin_infos.dat"s;
-   std::string strOutput_all = strDirectory + "\\Testausgabe_alle.txt"s;
-   std::string strOutput     = strDirectory + "\\Testausgabe.txt"s;
+   static const std::string strFilename   = "berlin_infos.dat";
+   static const std::string strOutput_all = "Testausgabe_alle.txt";
+   static const std::string strOutput     = "Testausgabe.txt";
+
+   fs::path    filename                   = directory / strFilename;
+   fs::path    output_all                 = directory / strOutput_all;
+   fs::path    output                     = directory / strOutput;
+
    std::vector<std::string> captions;
 
    using call_func = std::function<void()>;
@@ -62,15 +67,15 @@ void Rechentest(std::string const& strDirectory, int iCount = 1) {
    static size_func empty_size = []() -> mySizeRet { std::optional<size_t> ret{ }; return ret; };
 
    static std::vector<std::tuple<std::string, std::string, std::string, call_func, size_func>> test_funcs = {
-      { "delete file"s, "delete output file "s, "output files deleted"s,
-            [&strDirectory]() {
-               for (fs::path dir{ strDirectory }; auto const& file : { "testausgabe.txt", "testausgabe_alle.txt" }) {
+      { "delete file"s, "delete all output file "s, "output files deleted"s,
+            [&directory]() {
+               for (fs::path dir{ directory }; auto const& file : { "testausgabe.txt", "testausgabe_alle.txt" }) {
                   fs::remove(dir / file);
                   }
                },
          empty_size },
-      { "read file"s, "read file "s + strFilename, "datasets read from file"s,
-            std::bind(Reading<double>, std::ref(vData), std::cref(strFilename)),
+      { "read file"s, "read file \""s + strFilename + "\""s, "datasets read from file"s,
+            std::bind(Reading<double>, std::ref(vData), std::cref(filename)),
             addresses_size 
       },
       // -----------------------------------------------------------------------------
@@ -85,18 +90,18 @@ void Rechentest(std::string const& strDirectory, int iCount = 1) {
             addresses_size 
       },
       // -----------------------------------------------------------------------------
-      { "write all"s, "write data to "s + strOutput_all, "datasets wrote to file"s,
-            std::bind(Writing<double>, std::cref(vData), std::cref(strOutput_all)),
+      { "write all"s, "write data to \""s + strOutput_all + "\""s, "datasets wrote to file"s,
+            std::bind(Writing<double>, std::cref(vData), std::cref(output_all)),
             addresses_size 
       // -----------------------------------------------------------------------------
       },
-      { "delete dir"s, "delete directory "s + strDirectory, "directories deleted"s,
-            std::bind(DeleteDirectories, std::cref(strDirectory)),
+      { "delete dir"s, "delete directory "s, "directories deleted"s,
+            std::bind(DeleteDirectories, std::cref(directory)),
             empty_size 
       },
       // -----------------------------------------------------------------------------
-      { "write dir"s, "write data to directory "s + strDirectory, "datasets wrote to directories"s,
-            std::bind(WriteToDirectory<double>, std::cref(strDirectory), std::ref(vData)),
+      { "write dir"s, "write data to directory "s, "datasets wrote to directories"s,
+            std::bind(WriteToDirectory<double>, std::cref(directory), std::ref(vData)),
             addresses_size 
       },
       // -----------------------------------------------------------------------------
@@ -108,8 +113,8 @@ void Rechentest(std::string const& strDirectory, int iCount = 1) {
             addresses_capacity 
       },
       // -----------------------------------------------------------------------------
-      { "read dir"s, "read data from directory "s + strDirectory, "datasets read from directories"s,
-            std::bind(ReadFromDirectory<double>, std::cref(strDirectory), std::ref(vData)),
+      { "read dir"s, "read data from directory "s, "datasets read from directories"s,
+            std::bind(ReadFromDirectory<double>, std::cref(directory), std::ref(vData)),
             addresses_size 
       },
       // -----------------------------------------------------------------------------
@@ -133,9 +138,9 @@ void Rechentest(std::string const& strDirectory, int iCount = 1) {
             value_size 
       },
       // -----------------------------------------------------------------------------
-      { "write part"s, "write this data to "s + strOutput, "datasets wrote to file"s,
-            [&vData, &it, &strOutput]() { 
-                WritingPart<double>(vData.begin(), it, strOutput); 
+      { "write part"s, "write this data to \""s + strOutput + "\""s, "datasets wrote to file"s,
+            [&vData, &it, &output]() { 
+                WritingPart<double>(vData.begin(), it, output); 
                 },
             value_size 
             }
@@ -151,13 +156,13 @@ void Rechentest(std::string const& strDirectory, int iCount = 1) {
    test.captions_short.emplace_back("total"s);
 
    test.loc          = std::locale("de_DE");
-   test.strDirectory = strDirectory;
+   test.strDirectory = directory;
    test.iTestCases   = iCount;
    test.prec         = time_prec;
    test.start_time   = std::chrono::system_clock::now();
    std::string strTimeStamp = get_current_timestamp(test.start_time);
-   test.strProtocol  = strDirectory + "\\protokoll"s + strTimeStamp + ".csv"s;
-   test.strOverview  = strDirectory + "\\overview"s + strTimeStamp + ".txt"s;
+   test.strProtocol  = directory / ("protokoll"s + strTimeStamp + ".csv"s);
+   test.strOverview  = directory / ("overview"s + strTimeStamp + ".txt"s);
 
 
    WriteStart<double>(std::cout, test);
@@ -167,7 +172,7 @@ void Rechentest(std::string const& strDirectory, int iCount = 1) {
    try {
       std::cout << std::format("Check Input with {} ... ", "D:\\Test_Reference");
       auto func_start = myClock::now();
-      Compare_Input(strDirectory, "D:\\Test_Reference");
+      Compare_Input(directory, "D:\\Test_Reference");
       auto func_ende = myClock::now();
       auto runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
       std::cout << std::format(" Done in {:.{}f} sec\n\n", runtime.count() / time_factor, time_prec);
@@ -212,7 +217,7 @@ void Rechentest(std::string const& strDirectory, int iCount = 1) {
       
       try {
          auto func_start = myClock::now();
-         Compare_Output(strDirectory, "D:\\Test_Reference");
+         Compare_Output(directory, "D:\\Test_Reference");
          auto func_ende = myClock::now();
          auto runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
          std::cout << std::format(" Done in {:.{}f} sec\n\n", runtime.count() / time_factor, time_prec);

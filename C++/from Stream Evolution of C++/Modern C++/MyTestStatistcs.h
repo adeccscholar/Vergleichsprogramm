@@ -8,6 +8,9 @@
 #include <numeric>
 #include <chrono>
 #include <vector>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 using myClock = std::chrono::high_resolution_clock;
 using myTimePoint = std::chrono::time_point<std::chrono::system_clock>;
@@ -45,9 +48,9 @@ struct TTestData {
    std::vector<std::string> captions;
    std::vector<std::string> captions_short;
    int                      iTestCases;
-   std::string              strDirectory;
-   std::string              strProtocol;
-   std::string              strOverview;
+   fs::path                 strDirectory;
+   fs::path                 strProtocol;
+   fs::path                 strOverview;
    myTimePoint              start_time;
    myTimePoint              end_time;
    measurements_type<ty>    measurements;
@@ -138,20 +141,20 @@ template <typename ty>
    requires std::floating_point<ty>
 void WriteStatistic(std::ostream& out, TTestData<ty> test) {
    static auto constexpr print_caption = [](std::ostream& out) {
-      out << std::format("| {0:>46}{1:>9}{0:>2}{2:>11}{0:>2}{3:>11}{0:>2}{4:>11}{0:>2}{5:>11}{0:>2}{6:>11}{0:>2}{7:>11}\n", 
+      out << std::format("| {0:>46}{1:>7}{0:>2}{2:>11}{0:>2}{3:>11}{0:>2}{4:>11}{0:>2}{5:>11}{0:>2}{6:>11}{0:>2}{7:>11} |\n", 
                          "|", "count", "minimum", "mean", "median", "maximum", "variance", "std_dev");
       };
    static auto constexpr print_line = [](std::ostream& out) {
-      out << std::format("| {0:->46}{0:->11}{0:->13}{0:->13}{0:->13}{0:->13}{0:->13}{1:->13}\n", "+", "-");
+      out << std::format("+ {0:->46}{0:->9}{0:->13}{0:->13}{0:->13}{0:->13}{0:->13}{1:->12}+\n", "+", "-");
       };
 
    auto constexpr print_data = [&test](std::ostream& out, std::string const& test_name, Statistical_Data<ty> const& stats) {
-      out << std::format("| {2:<45s}{1}{3:>9d}{1:^3}{4:10.{0}f}{1:^3}{5:10.{0}f}{1:^3}{6:10.{0}f}{1:^3}{7:10.{0}f}{1:^3}{8:10.{0}f}{1:^3}{9:10.{0}f}\n",
+      out << std::format("| {2:<45s}{1}{3:>7d}{1:^3}{4:10.{0}f}{1:^3}{5:10.{0}f}{1:^3}{6:10.{0}f}{1:^3}{7:10.{0}f}{1:^3}{8:10.{0}f}{1:^3}{9:10.{0}f} |\n",
          test.prec, "|", test_name, stats.count, stats.minimum, stats.mean, stats.median, stats.maximum, stats.variance, stats.std_deviation);
       };
 
    auto constexpr print_sum = [&test](std::ostream& out, std::string const& test_name, Statistical_Data<ty> const& stats) {
-      out << std::format("| {2:<45s}{1}{3:>9}{1:^3}{4:10.{0}f}{1:^3}{5:10.{0}f}{1:^3}{6:10.{0}f}{1:^3}{7:10.{0}f}\n",
+      out << std::format("| {2:<45s}{1}{3:>7}{1:^3}{4:10.{0}f}{1:^3}{5:10.{0}f}{1:^3}{6:10.{0}f}{1:^3}{7:10.{0}f}{1:^3}{3:10}{1:^3}{1:>12}\n",
          test.prec, "|", test_name, " ", stats.minimum, stats.mean, stats.median, stats.maximum);
       };
 
@@ -161,6 +164,7 @@ void WriteStatistic(std::ostream& out, TTestData<ty> test) {
    WriteStart(out, test);
    out << " - end time:                  " << get_current_time_and_date(test.end_time) << "\n\n"s;
 
+   print_line(out);
    print_caption(out);
    print_line(out);
    
@@ -182,4 +186,5 @@ void WriteStatistic(std::ostream& out, TTestData<ty> test) {
    print_line(out);
    print_data(out, "total time", stats);
    print_sum(out, "cumulated time", sum);
+   print_line(out);
    }
