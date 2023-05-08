@@ -139,10 +139,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Geodaten.cpp" />
+    <ClCompile Include="MyProcess.cpp" />
     <ClCompile Include="Test.cpp" />
     <ClCompile Include="Test_Read.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Geodaten.h" />
     <ClInclude Include="MyAddress.h" />
     <ClInclude Include="MyCheck.h" />
     <ClInclude Include="MyConvert.h" />

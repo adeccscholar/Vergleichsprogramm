@@ -5,6 +5,7 @@
 #include "MyData.h"
 #include "MyFileIterator.h"
 #include "MyConvert.h"
+#include "MyTestStatistcs.h"
 
 #include <iostream>
 #include <fstream>
@@ -66,6 +67,7 @@ inline void Reading(data_vector<ty>& vData, fs::path const& strFile) {
 
    std::for_each(std::execution::par, lines.begin(), lines.end(), [&vData](auto const& val) {
          for(auto const& [iCount, data] : my_enumerate(std::ranges::split_view(val.view, delim))) {
+         //for (auto const& [iCount, data] : std::ranges::split_view(val.view, delim) | std::views::enumerate | std::ranges::to<std::map>) {
             funcs_vw[iCount](vData[val.index].first, std::string_view{ data.begin(), data.end() });
             }
       });
@@ -374,4 +376,7 @@ inline void WriteToDirectory(fs::path const& strPath, data_vector<ty>& vData) {
    }
 
 
+
+// Prototype for test function
+void Rechentest(fs::path const& directory, int iCount = 1);
 

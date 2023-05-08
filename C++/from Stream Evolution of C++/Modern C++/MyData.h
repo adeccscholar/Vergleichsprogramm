@@ -75,7 +75,7 @@ public:
    void Longitude(std::string_view newVal) { auto result = std::from_chars(newVal.data(), newVal.data() + newVal.size(), mLoc.second); } //mLoc.second = std::stod(newVal); }
 
 private:
-   void _init(void) { mLoc = { 0.0, 0.0 }; }
+   void _init(void) { mLoc = Location<ty> { 0.0, 0.0 }; }
    void _copy(TData const& ref) { mLoc = ref.mLoc; }
    void _swap(TData& ref) noexcept { std::swap(mLoc, ref.mLoc); }
 };

@@ -10,260 +10,67 @@
 */
 
 
-#include "Tool_Helper.h"
-#include "MyCheck.h"
 #include "MyProcess.h"
-#include "MyTestStatistcs.h"
+#include "Geodaten.h"
 
 #include <iostream>
 #include <iomanip>
-#include <locale>
-#include <sstream>
 #include <string>
-#include <string_view> // !! C++17
-#include <vector>
-#include <map>
-#include <fstream>
-#include <format>
+#include <locale>
 
-#include <chrono>
+using namespace std::literals;
 
+std::vector<std::tuple<std::string, Location<double>, myMercatorETRS89<double>>> test_coordinates = {
+   { "Berlin, Neukölln, Flughafenstraße 44"s,             { 52.481126300, 13.426709160 }, { 1494653.0525, 6887591.0300 } },
+   { "Berlin, Kreuberg, Waldemarstraße 19"s,              { 52.504125740, 13.417856830 }, { 1493668.0112, 6891795.6821 } },
+   { "Berlin, Altglienicke, Schirnerstraße 10"s,          { 52.413607310, 13.560004810 }, { 1509492.7488, 6875259.6413 } },
+   { "Berlin, Steglitz, Spinozastraße 11d"s,              { 52.465269970, 13.306627940 }, { 1481286.8964, 6884693.7256 } },
+   { "Berlin, Rudow, Ehrenpreisweg 12"s,                  { 52.426379790, 13.489936020 }, { 1501692.0799, 6877590.2428 } },
+   { "Berlin, Biesdorf, Eckermannstraße 120"s,            { 52.524293190, 13.555268650 }, { 1508964.7860, 6895484.5352 } },
+   { "Berlin, Lichtenberg, Landsberger Allee 166"s,       { 52.530274610, 13.468511080 }, { 1499307.8579, 6896579.1556 } },
+   { "Berlin, Karlshorst, Am Walde 2"s,                   { 52.475621850, 13.510386960 }, { 1503968.4082, 6886583.7992 } },
+   { "Berlin, Mitte, Sophienstraße 19"s,                  { 52.525689470, 13.400972300 }, { 1491788.9335, 6895739.6258 } },
+   { "Berlin, Reinickendorf, Dambockstraße 40"s,          { 52.604694250, 13.245121960 }, { 1474440.6845, 6910208.8853 } },
+   { "Berlin, Prenzlauer Berg, Malmöer Straße 20"s,       { 52.553200760, 13.402762190 }, { 1491988.1250, 6900775.9497 } },
+   { "Berlin, Spandau, Heerstraße 359"s,                  { 52.517629600, 13.173104160 }, { 1466422.9390, 6894266.0430 } },
+   { "Berlin, Spandau, Gatower Straße 139"s,              { 52.507932270, 13.179993850 }, { 1467189.9873, 6892492.7577 } },
+   { "Berlin, Spandau, Gatower Straße 139a"s,             { 52.507950800, 13.180140950 }, { 1467205.8923, 6892496.2200 } },
+   { "Berlin, Kladow, Kreutzwaldstraße 3d"s,              { 52.459196610, 13.128127660 }, { 1461415.3565, 6883583.2227 } },
+   { "Berlin, Spandau, Aumetzer Weg 8a"s,                 { 52.544082590, 13.131852890 }, { 1461831.2232, 6899106.7709 } },
+   { "Brandenburg, Brandenburg, Akazienweg 34a"s,         { 52.373195600, 12.531553600 }, { 1395071.6302, 6867883.2056 } },  // ChatGPT fail, Google
+   { "Brandenburg, Potsdam, Rückertstraße 3"s,            { 52.425069200, 12.998004800 }, { 1447217.1807, 6877342.6792 } },
+   { "Brandenburg, Kyritz, Bergstraße 1"s,                { 52.950849300, 12.383160500 }, { 1378581.9592, 6973902.6536 } },
+   { "Brandenburg, Bad Wilsnack, An der Trift 8"s,        { 52.953796200, 11.947701200 }, { 1330302.1054, 6974450.4095 } },
+   { "Brandenburg, Schönefeld, Glasower Allee 5"s,        { 52.379011500, 13.442341800 }, { 1496660.8297, 6868939.0047 } },
+   { "Brandenburg, Teltow, Iserstraße 126"s,              { 52.383144400, 13.244641200 }, { 1474600.6891, 6869697.7600 } },
+   { "Brandenburg, Bernau, Birkenstraße 15"s,             { 52.650484400, 13.591826500 }, { 1513319.5267, 6918609.4222 } },
+   { "Brandenburg, Storkow, Fürstenwalder Straße 55"s,    { 52.275010300, 13.960511600 }, { 1554246.9802, 6849970.4466 } },
+   { "Brandenburg, Bad Saarow, Seeallee 31"s,             { 52.239944900, 14.028610500 }, { 1561925.3759, 6843608.3617 } },
+   { "Thüringen, Saalfeld/Saale, Stauffenbergstraße 38"s, { 50.653266000, 11.385995100 }, { 1267774.2194, 6560200.9094 } },  // { 32668844.086, 5613998.394 }
+   { "Thüringen, Ranis, Lindenstraße 37"s,                { 50.662880000, 11.564565400 }, { 1287652.6084, 6561858.7571 } },  // { 32681428.749, 5615470.388 }
+   { "Thüringen, Bad Lobenstein, Poststraße 21"s,         { 50.454684900, 11.637411100 }, { 1295757.9209, 6525395.8957 } },  // { 32687397.563, 5592517.573 }
+   { "Thüringen, Rudolstadt, Weinbergstraße 1"s,          { 50.722036900, 11.329881300 }, { 1261518.3643, 6572277.6734 } },  // { 32664631.277, 5621513.36 }
+   { "Thüringen, Gera, Schmiedestraße 5"s,                { 50.850573000, 12.025029000 }, { 1338908.9736, 6594901.5238 } },  // { 32713108.831, 5637574.866 }
+   { "Thüringen, Bad Köstritz, Am Rosenhügel 60"s,        { 50.928313800, 11.995465000 }, { 1335614.6502, 6608622.7693 } },  // { 32710674.915, 5646133.904 }
+   { "Thüringen, Hermsdorf, Schillerstraße 29"s,          { 50.899388200, 11.858601500 }, { 1320378.7811, 6603510.7405 } },  // { 32701183.73, 5642532.995 }
+   { "Thüringen, Stadtroda, Hauptstraße 50"s,             { 50.880189900, 11.789461600 }, { 1312763.4475, 6599889.1995 } },  // { 32696460.626, 5640067.11 }
+   { "Thüringen, Stadtroda, Bahnhofsweg 1"s,              { 50.881188900, 11.792371600 }, { 1312588.5803, 6600084.4774 } },  // { 32696345.485, 5640185.981 }
+   { "Thüringen, Jena, Okenstraße 8"s,                    { 50.922282900, 11.568596000 }, { 1288094.9581, 6607557.6078 } },  // { 32680705.672, 5644330.785 }
+   { "Thüringen, Jena, Lucas-Cranach-Allee 1"s,           { 50.929443400, 11.515853000 }, { 1282210.6843, 6608818.5686 } },  // { 32676964.007, 5644996.452 }
+   { "Thüringen, Schleiz, Hauptstraße 30"s,               { 50.565980000, 11.901615000 }, { 1325144.8761, 6544844.5559 } },  // { 32705650.068, 5605568.36 }
+   { "Thüringen, Greiz, Kirchenring 1"s,                  { 50.613673400, 12.131085100 }, { 1350706.2321, 6553206.6656 } },  // { 32721683.846, 5611531.999 }
+   { "Thüringen, Zeulenroda-Triebes, Am Stäudig 13"s,     { 50.642737600, 11.974763100 }, { 1333318.7394, 6558342.5606 } },  // { 32710505.17, 5614329.718 }
+   { "Thüringen, Meiningen, Schulgasse 1"s,               { 50.493370000, 10.353983100 }, { 1152934.3638, 6532303.9405 } },  // { 32596248.971, 5594458.272 }
+   { "Thüringen, Ilmenau, Kastanienallee 6"s,             { 50.704271300, 11.018474900 }, { 1226870.7580, 6569156.6238 } },  // { 32642718.196, 5618893.154 }
+   { "Thüringen, Neuhaus am Rennweg, Oberer Weg 3"s,      { 50.516363300, 11.144990200 }, { 1240925.7661, 6536206.7978 } },  // { 32652237.918, 5598260.611 }
+   { "Thüringen, Erfurt, Ludwig-Jahn-Straße 9"s,          { 51.049655100, 11.042637900 }, { 1229536.2354, 6630082.914 } },  // { 32643345.083, 5657337.349 }
+   { "Thüringen, Erfurt, Kunemundweg 11"s,                { 51.052289100, 11.037108900 }, { 1228928.0111, 6630554.6886 } },  // { 32642953.948, 5657622.955 }
+   { "Thüringen, Weimar, Brehmestraße 4"s,                { 50.988754300, 11.326331800 }, { 1261115.0125, 6619305.3178 } },  // { 32663440.366, 5651156.23 }
+   { "Thüringen, Weimar, Buchenhain 4"s,                  { 50.998454900, 11.277165600 }, { 1255681.8514, 6621014.6041 } },  // { 32659982.105, 5652123.678 }
+   { "Thüringen, Meuselwitz, Gänsehals 5"s,               { 51.039022200, 12.299616100 }, { 1369501.6539, 6628149.1410 } }, // { 32731511.297, 5659323.398 }
+   { "Thüringen, Altenburg, Ahornstraße 6"s,              { 50.982066300, 12.451754700 }, { 1386342.2136, 6618008.1909 } }  // { 32742412.83, 5653438.551 }
 
-
-void Rechentest(fs::path const& directory, int iCount = 1) {
-   using myTimeType = std::chrono::microseconds;  // std::chrono::milliseconds
-   static const double time_factor = 1000000.;    // 1000.
-   static const int    time_prec   = 6;           // 3
-
-   data_vector<double> vData;
-   data_vector<double>::iterator it;
-   Location<double> point    = { 52.520803, 13.40945 };
-   static const std::string strFilename   = "berlin_infos.dat";
-   static const std::string strOutput_all = "Testausgabe_alle.txt";
-   static const std::string strOutput     = "Testausgabe.txt";
-
-   fs::path    filename                   = directory / strFilename;
-   fs::path    output_all                 = directory / strOutput_all;
-   fs::path    output                     = directory / strOutput;
-
-   std::vector<std::string> captions;
-
-   using call_func = std::function<void()>;
-   using mySizeRet = std::optional<size_t>;
-   using size_func = std::function<mySizeRet()>;
-
-   static size_func addresses_size = [&vData]() -> mySizeRet {
-      return std::make_optional<size_t>(vData.size());
-      };
-
-   static size_func addresses_capacity = [&vData]() -> mySizeRet {
-      return std::make_optional<size_t>(vData.capacity());
-      };
-
-   static size_func value_size = [&it, &vData]() -> mySizeRet {
-      return std::make_optional<size_t>(std::distance(vData.begin(), it));
-      };
-
-   static size_func empty_size = []() -> mySizeRet { std::optional<size_t> ret{ }; return ret; };
-
-   static std::vector<std::tuple<std::string, std::string, std::string, call_func, size_func>> test_funcs = {
-      { "delete file"s, "delete all output file "s, "output files deleted"s,
-            [&directory]() {
-               for (fs::path dir{ directory }; auto const& file : { "testausgabe.txt", "testausgabe_alle.txt" }) {
-                  fs::remove(dir / file);
-                  }
-               },
-         empty_size },
-      { "read file"s, "read file \""s + strFilename + "\""s, "datasets read from file"s,
-            std::bind(Reading<double>, std::ref(vData), std::cref(filename)),
-            addresses_size 
-      },
-      // -----------------------------------------------------------------------------
-      { "calc point"s, "calculate data"s, "datasets calculated for point"s,
-            [&vData, &point]() { CalculateRange(point, vData.begin(), vData.end()); },
-            //std::bind(CalculateRange<double>, std::cref(point), vData.begin(), vData.end()),
-            addresses_size 
-      },
-      // -----------------------------------------------------------------------------
-      { "sort din"s, "sort data"s, "datasets sorted in vector"s,
-            std::bind(Sorting<double>, std::ref(vData)),
-            addresses_size 
-      },
-      // -----------------------------------------------------------------------------
-      { "write all"s, "write data to \""s + strOutput_all + "\""s, "datasets wrote to file"s,
-            std::bind(Writing<double>, std::cref(vData), std::cref(output_all)),
-            addresses_size 
-      // -----------------------------------------------------------------------------
-      },
-      { "delete dir"s, "delete directory "s, "directories deleted"s,
-            std::bind(DeleteDirectories, std::cref(directory)),
-            empty_size 
-      },
-      // -----------------------------------------------------------------------------
-      { "write dir"s, "write data to directory "s, "datasets wrote to directories"s,
-            std::bind(WriteToDirectory<double>, std::cref(directory), std::ref(vData)),
-            addresses_size 
-      },
-      // -----------------------------------------------------------------------------
-      { "del data"s, "delete data "s, "datasets still in alive"s,
-            [&vData]() { 
-                vData.clear(); 
-                vData.shrink_to_fit(); 
-                },
-            addresses_capacity 
-      },
-      // -----------------------------------------------------------------------------
-      { "read dir"s, "read data from directory "s, "datasets read from directories"s,
-            std::bind(ReadFromDirectory<double>, std::cref(directory), std::ref(vData)),
-            addresses_size 
-      },
-      // -----------------------------------------------------------------------------
-      { "split data"s, "partitioning data to "s, "datasets partitioned in vector"s,
-            [&vData, &it]() {
-               it = std::partition(std::execution::par, vData.begin(), vData.end(), 
-                         [](auto const& val) { return val.second.first < 1000.0; });
-               },
-            value_size
-      },
-      // -----------------------------------------------------------------------------
-      { "sort part"s, "sort partitioned data "s, "partitioned datasets sorted"s,
-            [&vData, &it]() {
-                std::sort(std::execution::par, vData.begin(), it, [](auto const& lhs, auto const& rhs) {
-                   if (auto cmp = lhs.second.first <=> rhs.second.first; cmp != 0) [[likely]] return cmp > 0;
-                   else if (auto cmp = lhs.second.second <=> rhs.second.second; cmp != 0) return cmp < 0;
-                   else if (auto cmp = lhs.first.Street() <=> rhs.first.Street(); cmp != 0) return cmp < 0;
-                   else return lhs.first.StreetNumber() < rhs.first.StreetNumber();
-                   });
-                },
-            value_size 
-      },
-      // -----------------------------------------------------------------------------
-      { "write part"s, "write this data to \""s + strOutput + "\""s, "datasets wrote to file"s,
-            [&vData, &it, &output]() { 
-                WritingPart<double>(vData.begin(), it, output); 
-                },
-            value_size 
-            }
-      };
-     
-   TTestData<double> test;
-   test.strTest        = "comparisons test"s;
-   test.strDescription = "read and write cadastre data with geographic coordinates and geodetic calculations"s;
-   for (int i = 0; auto const& test_func : test_funcs) {
-      test.captions_short.emplace_back(std::get<0>(test_func));
-      test.captions.emplace_back(std::get<1>(test_func));
-      }
-   test.captions_short.emplace_back("total"s);
-
-   test.loc          = std::locale("de_DE");
-   test.strDirectory = directory;
-   test.iTestCases   = iCount;
-   test.prec         = time_prec;
-   test.start_time   = std::chrono::system_clock::now();
-   std::string strTimeStamp = get_current_timestamp(test.start_time);
-   test.strProtocol  = directory / ("protokoll"s + strTimeStamp + ".csv"s);
-   test.strOverview  = directory / ("overview"s + strTimeStamp + ".txt"s);
-
-
-   WriteStart<double>(std::cout, test);
-   std::cout << std::endl;
-
-   
-   try {
-      std::cout << std::format("Check Input with {} ... ", "D:\\Test_Reference");
-      auto func_start = myClock::now();
-      Compare_Input(directory, "D:\\Test_Reference");
-      auto func_ende = myClock::now();
-      auto runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
-      std::cout << std::format(" Done in {:.{}f} sec\n\n", runtime.count() / time_factor, time_prec);
-      }
-   catch(std::exception& ex) {
-      std::cout << std::format("Error while checking input files: {}\n", ex.what());
-      return;
-      }
-   
-
-   for(int step : std::ranges::iota_view{ 0, test.iTestCases }) {
-      std::cout << std::format("{2:} start run {0:} of {1:}\n", step + 1, iCount, get_current_time_and_date());
-      //std::cout << get_current_time_and_date() << " start run " << step + 1 << " of " << iCount << std::endl;
-      auto time_for_all = myTimeType::zero();
-      std::vector<double> measurement;
-      for (auto const& test_func : test_funcs) {
-         std::cout << std::format("{} {:<45s}-", get_current_time_and_date(), std::get<1>(test_func));
-         try {
-            auto func_start = myClock::now();
-            std::get<3>(test_func)();
-            auto func_ende = myClock::now();
-            auto runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
-            measurement.emplace_back(runtime.count() / time_factor);
-            time_for_all += runtime;
- 
-            if (auto val = std::get<4>(test_func)(); val) std::cout << std::format("{:>9} ", *val); 
-            else  std::cout << "          "; 
-     
-            std::cout << std::format("{:<30} in {:9.{}f} sec\n", std::get<2>(test_func), runtime.count() / time_factor, time_prec);
-            std::this_thread::sleep_for(std::chrono::milliseconds(250));
-            }
-         catch (std::exception& ex) {
-            std::cout << "error: " << ex.what() << "\n";
-            }
-         }
-      measurement.emplace_back(time_for_all.count() / time_factor);
-      test.measurements.emplace_back(measurement);
-      std::cout << std::endl << get_current_time_and_date() << " " << std::left << "time for all operations " 
-                << std::right << std::setw(9) << std::setprecision(time_prec) << time_for_all.count() / time_factor << " sec\n";
-      std::cout << "\n"s;
-      std::cout << std::format("Check with directory {} ...", "D:\\Test_Reference");
-      
-      try {
-         auto func_start = myClock::now();
-         Compare_Output(directory, "D:\\Test_Reference");
-         auto func_ende = myClock::now();
-         auto runtime = std::chrono::duration_cast<myTimeType>(func_ende - func_start);
-         std::cout << std::format(" Done in {:.{}f} sec\n\n", runtime.count() / time_factor, time_prec);
-         }
-      catch(std::exception& ex) {
-         std::cout << std::format("Error while checking input files: {}\n", ex.what());
-         return;
-         }
-      
-      if(step + 1 < test.iTestCases) {
-         static const std::string strWait = "clear all data and wait ... | "s;
-         auto Clear = []() {
-            for (int s = 0; s < strWait.size(); ++s) {
-               std::cout << "\b \b";
-               std::this_thread::sleep_for(std::chrono::milliseconds(5));
-               }
-            };
-         std::cout << strWait;
-         vData.clear();
-         vData.shrink_to_fit();
-
-         for(auto i : std::views::iota(0, 20)) {
-            static char wheel[] = { '/',  '-', '\\',  '|' };
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
-            std::cout << "\b\b" << wheel[i % 4] << ' ';
-            }
-         Clear();
-         }
-      }
-   test.end_time = std::chrono::system_clock::now();
-
-   std::ofstream p(test.strProtocol);
-   p.imbue(test.loc);
-   WriteProtocol<double>(p, test);
-
-   // Auswertung
-   p.close();
-   p.open(test.strOverview);
-   p.imbue(test.loc);
-   p.setf(std::ios::fixed);
-   p.setf(std::ios::showpoint);
-   WriteStatistic<double>(std::cout, test);
-   WriteStatistic<double>(p, test);
-   std::cout << "\n\nFinished. Good Bye!\n";
-   }
-
+   };
 
 int main(int argc, char* argv[]) {
    std::ios_base::sync_with_stdio(false);
@@ -278,12 +85,34 @@ int main(int argc, char* argv[]) {
       strInput = argv[2];
       }
 
-   Rechentest(strInput, iCount);
+  // Rechentest(strInput, iCount);
 
+   std::string strKeyFile = "D:\\Test\\schluessel-th.txt";
+   std::string strFile    = "D:\\Test\\Adressen_-_Thüringen.csv";
+   std::string strOutput  = "D:\\Test\\Thüringen.txt";
+   auto data = Geodaten::read_keys("D:\\Test\\schluessel-th.txt");
+   //std::ofstream ofs(strOutput); // Kontrollieren !!!
+   //Geodaten::Read_Th(strKeyFile, strFile, ofs);
+
+   strKeyFile = "D:\\Test\\schluessel-bb.txt";
+   strFile    = "D:\\Test\\Adressen_-_Brandenburg.csv";
+
+   strOutput = "D:\\Test\\Brandenburg.txt";
+   std::ofstream ofs(strOutput);
+   Geodaten::Read_Bb(strKeyFile, strFile, ofs);
+   /*
+   for(auto const& [place, location, mercator] : test_coordinates) {
+      auto loc = Location<double>::ConvertMercatorETRS89ToWGS84(mercator);
+      auto result = Calculate(location, loc);
+      std::cout << std::left << std::setw(50) << place << " " 
+                << std::setprecision(9) << location
+                << " -> " << loc << " = " << std::right 
+                << std::setw(10) << std::setprecision(2) << result.first << "m" << std::endl;
+      }
+   */
    //Compare_Output("e:\\Test", "D:\\Test_Reference");
    
-   //std::thread t(Rechentest, std::cref(strInput));
-   //t.join();
+    //t.join();
 
    #if defined __BORLANDC__
    std::cout << "... press a key ...";

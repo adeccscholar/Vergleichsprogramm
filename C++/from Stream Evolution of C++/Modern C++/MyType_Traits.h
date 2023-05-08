@@ -1,6 +1,8 @@
 #pragma once
 
 #include <type_traits>
+#include <string>
+#include <string_view>
 #include <optional>
 #include <vector>
 #include <set>
@@ -50,6 +52,19 @@ struct is_map<ty, typename std::enable_if<std::is_same<ty, std::map<typename ty:
    typename ty::key_compare, typename ty::allocator_type>>::value>::type> {
    static constexpr bool value = true;
 };
+
+template <typename ty>
+struct is_my_string {
+   static constexpr bool value = std::is_same<std::remove_cvref_t<ty>, std::string>::value || 
+                                 std::is_same<std::remove_cvref_t<ty>, std::string_view>::value;
+};
+
+/*
+std::is_convertible_v<ty, std::string_view>;
+*/
+
+template <typename ty>
+concept myString = is_my_string<ty>::value;
 
 
 template <typename ty>
