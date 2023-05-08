@@ -53,19 +53,17 @@ struct is_map<ty, typename std::enable_if<std::is_same<ty, std::map<typename ty:
    static constexpr bool value = true;
 };
 
+
 template <typename ty>
 struct is_my_string {
-   static constexpr bool value = std::is_same<std::remove_cvref_t<ty>, std::string>::value || 
+   static constexpr bool value = std::is_same<std::remove_cvref_t<ty>, std::string>::value ||
                                  std::is_same<std::remove_cvref_t<ty>, std::string_view>::value;
+                                // std::is_convertible_v(std::remove_cvref_t<ty>, std::string> 
 };
 
-/*
-std::is_convertible_v<ty, std::string_view>;
-*/
 
 template <typename ty>
 concept myString = is_my_string<ty>::value;
-
 
 template <typename ty>
 concept myIntegral = is_myIntegral<ty>::value;

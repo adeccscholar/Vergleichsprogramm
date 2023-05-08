@@ -85,15 +85,18 @@ int main(int argc, char* argv[]) {
       strInput = argv[2];
       }
 
-  // Rechentest(strInput, iCount);
+  //Rechentest(strInput, iCount);
+
 
    std::string strKeyFile = "D:\\Test\\schluessel-th.txt";
    std::string strFile    = "D:\\Test\\Adressen_-_Thüringen.csv";
    std::string strOutput  = "D:\\Test\\Thüringen.txt";
-   auto data = Geodaten::read_keys("D:\\Test\\schluessel-th.txt");
+   //auto data = Geodaten::read_keys("D:\\Test\\schluessel-th.txt");
    //std::ofstream ofs(strOutput); // Kontrollieren !!!
-   //Geodaten::Read_Th(strKeyFile, strFile, ofs);
+  // Geodaten::Read_Th(strKeyFile, strFile, ofs);
 
+   
+  
    strKeyFile = "D:\\Test\\schluessel-bb.txt";
    strFile    = "D:\\Test\\Adressen_-_Brandenburg.csv";
 

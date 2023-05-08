@@ -16,7 +16,7 @@ using data_type = std::map<key_type, value_type>;
 
 data_type read_keys(std::string const& strFile);
 
-void Read_Th(std::string const& strKeyFile, std::string const& strFile, std::ostream& out = std::cout);
-void Read_Bb(std::string const& strKeyFile, std::string const& strFile, std::ostream& out = std::cout);
+void Read_Th(std::string const& strKeyFile, std::string strFile, std::ostream& out = std::cout);
+void Read_Bb(std::string const& strKeyFile, std::string strFile, std::ostream& out = std::cout);
 
 }

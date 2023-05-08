@@ -1,0 +1,31 @@
+Quelle: GeoSN, dl-de/by-2-0  https://www.govdata.de/dl-de/by-2-0
+Quellenvermerk: GDI-Th (2021) Datenlizenz Deutschland - Namensnennung - Version 2.0
+
+Offenheit der Lizenz:  Freie Nutzung
+Nutzungsbedingungen: Datenlizenz Deutschland Namensnennung 2.0
+Namensnennungstext: Geoportal Berlin / Hauskoordinaten
+URL: https://fbinter.stadt-berlin.de/fb/feed/senstadt/a_adressenberlin
+
+PLZ.csv
+gemeinfrei
+https://launix.de/launix/launix-gibt-plz-datenbank-frei/
+
+Brandenburg
+Die Daten können gemäß der „Datenlizenz Deutschland Namensnennung 2.0“ genutzt werden. 
+Folgender Quellenvermerk ist mindestens anzugeben: GeoBasis-DE/LGB, 2019
+
+Berlin
+Für die Nutzung der Daten ist die Datenlizenz Deutschland - Namensnennung - Version 2.0 anzuwenden. 
+Die Lizenz ist über https://www.govdata.de/dl-de/by-2-0 abrufbar. 
+Der Quellenvermerk gemäß (2) der Lizenz lautet "Geoportal Berlin / Adressen Berlin". 
+Es sind die datenschutzrechtlichen Bestimmungen, insbesondere das Bundesdatenschutzgesetz, zu beachten.
+
+Thüringen
+Für die Nutzung digitaler Geobasisdaten und frei zugänglicher Geodatendienste des TLVermGeo, 
+gelten die Nutzungsbedingungen nach der Datenlizenz Deutschland - Namensnennung, Version 2.0 
+unter Verwendung des Quellenvermerks: „© GDI-Th“
+
+Sachsen
+Open Data Datenlizenz Deutschland - Namensnennung - Version 2.0
+© Geobasisinformation und Vermessung Sachsen (GeoSN)
+Namensnennung: Geodaten Sachsen

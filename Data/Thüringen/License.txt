@@ -1,0 +1,4 @@
+Lizenz
+Für die Nutzung digitaler Geobasisdaten und frei zugänglicher Geodatendienste des TLVermGeo, 
+gelten die Nutzungsbedingungen nach der Datenlizenz Deutschland - Namensnennung, Version 2.0 
+unter Verwendung des Quellenvermerks: „© GDI-Th“

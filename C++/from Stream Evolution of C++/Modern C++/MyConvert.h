@@ -7,38 +7,24 @@
 #include <string_view>
 #include <cstdlib>
 
-/*
+
 template <std::integral ty>
-inline ty constexpr [[nodiscard]] string_to_int(std::string const&  strValue) {
-   //strValue.erase(0, strValue.find_first_not_of(" \t0"));
-   //strValue.erase(strValue.find_last_not_of(" ") + 1, strValue.length());
+inline ty constexpr [[nodiscard]] string_to_int(myString auto const&  strValue) {
+   if (strValue.size() == 0) return 0;
    auto str = strValue.substr(strValue.find_first_not_of(" "), strValue.find_last_not_of(" ") - strValue.find_first_not_of(" ") + 1);
    if(str.size() > 0) {
       ty value = 0;
-   // auto [ptr, ec] =
-   std::from_chars(strValue.data(), strValue.data() + strValue.size(), value);
-   // Fehlerbehandlung
+      // auto [ptr, ec] =
+      std::from_chars(strValue.data(), strValue.data() + strValue.size(), value);
+      // Fehlerbehandlung
       return value;
       }
    else {
       return 0;
       }
    }
-*/
 
-template <std::integral ty>
-inline ty constexpr [[nodiscard]] string_to_int(myString auto const& strValue) {
-   if (strValue.size() == 0) return 0;
-   auto str = strValue.substr(strValue.find_first_not_of(" "), strValue.find_last_not_of(" ") - strValue.find_first_not_of(" ") + 1);
-   if (str.size() > 0) {
-      ty value = 0;
-      /*auto [ptr, ec] =*/ std::from_chars(strValue.data(), strValue.data() + strValue.size(), value);
-      return value;
-   }
-   else {
-      return 0;
-   }
-}
+
 
 
 //template <typename ty>
