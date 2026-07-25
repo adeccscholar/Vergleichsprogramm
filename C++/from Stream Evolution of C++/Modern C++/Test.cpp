@@ -85,9 +85,9 @@ int main(int argc, char* argv[]) {
       strInput = argv[2];
       }
 
-  //Rechentest(strInput, iCount);
+  Rechentest(strInput, iCount);
 
-
+  /*
    std::string strKeyFile = "D:\\Test\\schluessel-th.txt";
    std::string strFile    = "D:\\Test\\Adressen_-_Thüringen.csv";
    std::string strOutput  = "D:\\Test\\Thüringen.txt";
@@ -103,6 +103,7 @@ int main(int argc, char* argv[]) {
    strOutput = "D:\\Test\\Brandenburg.txt";
    std::ofstream ofs(strOutput);
    Geodaten::Read_Bb(strKeyFile, strFile, ofs);
+   */
    /*
    for(auto const& [place, location, mercator] : test_coordinates) {
       auto loc = Location<double>::ConvertMercatorETRS89ToWGS84(mercator);
@@ -116,11 +117,12 @@ int main(int argc, char* argv[]) {
    //Compare_Output("e:\\Test", "D:\\Test_Reference");
    
     //t.join();
-
+  /*
    #if defined __BORLANDC__
    std::cout << "... press a key ...";
    getchar();
    #endif
+   */
    return 0;
 }
 
